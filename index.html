@@ -38,7 +38,11 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
 .tb-btn.primary:hover{background:#e3ecf7}
 .tb-btn.warn,.tb-btn.warn:hover{background:#b3261e;border-color:#b3261e;color:#fff}
 .tb-btn:focus-visible,.hint button:focus-visible,.ctrl button:focus-visible,.slot-add:focus-visible,.slot-rm:focus-visible{outline:2px solid #8db5ff;outline-offset:2px}
-@media (max-width:1240px){.tb-label,.tb-title small{display:none}.toolbar{gap:8px 10px;padding:9px 14px}.tb-btn{padding:0 10px}}
+.tb-switch .sw{position:relative;flex:none;width:28px;height:16px;border-radius:8px;background:rgba(255,255,255,.28);transition:background .15s}
+.tb-switch .sw::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .15s}
+.tb-switch[aria-checked="true"] .sw{background:#4c8dff}
+.tb-switch[aria-checked="true"] .sw::after{transform:translateX(12px)}
+@media (max-width:1400px){.tb-label,.tb-title small{display:none}.toolbar{gap:8px 10px;padding:9px 14px}.tb-btn{padding:0 10px}}
 
 /* ---------- Ark ---------- */
 .pages{display:flex;flex-direction:column;align-items:center;align-items:safe center;gap:10mm;padding:10mm 12px 24mm}
@@ -52,7 +56,9 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
 .doc-page .titles .t1{font-size:12.5pt}
 .doc-page .titles .t2{font-size:13.5pt}
 .spacer{flex:1}
-.page-foot{flex:none;height:16mm;display:flex;align-items:center;justify-content:center;font-size:7.5pt;color:#1c2230}
+.page-foot{position:relative;flex:none;height:16mm;display:flex;align-items:center;justify-content:center;font-size:7.5pt;color:#1c2230}
+.page-no{position:absolute;right:0;top:50%;transform:translateY(-50%);white-space:nowrap}
+body.no-pageno .page-no{display:none}
 
 /* ---------- Tabeller ---------- */
 table.grid{flex:none;width:var(--cw);border-collapse:collapse;table-layout:fixed}
@@ -84,7 +90,6 @@ td.c{cursor:pointer}
 
 /* Resultat / konklusjon */
 .result-wrap{width:var(--cw);margin-top:6mm}
-.result .r-tall>*{height:12mm}
 .result .r-comment>*{height:17mm}
 .result .r-comment td{vertical-align:top;padding-top:1.3mm}
 .result .r-sign>*{height:12mm}
@@ -135,6 +140,36 @@ td.c{cursor:pointer}
 .doc-content.empty>.hint{margin:auto 0}
 .doc-content.empty>.result-wrap{margin-top:auto}
 .pages.dragging .doc-content{outline:0.5mm dashed var(--accent);outline-offset:1.5mm}
+@media screen{.doc-page.target .doc-content{outline:0.3mm dashed #7fa3dd;outline-offset:1.5mm;border-radius:1mm}}
+.doc-page.result-only .band-table{display:none}
+.doc-page.result-only .doc-content{margin-top:4mm}
+
+/* Sidemeny (fester seg øverst ved dokumentasjonssidene) */
+.doc-section{position:relative;flex:none;width:210mm}
+.page-menu{position:sticky;top:calc(var(--tb-h,52px) + 12px);z-index:30;height:0}
+.pm-anchor{position:absolute;top:0;left:calc(100% + 14px);font:500 13.5px/1.25 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.pm-toggle{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 11px 0 12px;border:1px solid #b8c3d0;border-radius:8px;background:#fff;color:var(--navy);font-weight:650;white-space:nowrap;cursor:pointer;box-shadow:0 2px 8px rgba(20,30,50,.12)}
+.pm-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.pm-toggle svg{width:16px;height:16px}
+.pm-toggle .chev{width:14px;height:14px;transition:transform .15s}
+.pm-toggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.pm-toggle:focus-visible,.pm-item:focus-visible,.page-ctl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pm-items{position:absolute;top:calc(100% + 6px);right:0;width:310px;padding:6px;border:1px solid #cdd5df;border-radius:10px;background:#fff;box-shadow:0 12px 30px rgba(20,30,50,.22)}
+.pm-items[hidden]{display:none}
+.pm-item{display:flex;align-items:flex-start;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:7px;background:transparent;color:var(--ink);text-align:left;cursor:pointer}
+.pm-item:hover{background:#eef3fa}
+.pm-item>svg{flex:none;width:18px;height:18px;margin-top:1px;color:var(--navy)}
+.pm-item b{display:block;font-weight:650;color:var(--navy)}
+.pm-item small{display:block;margin-top:2px;font-size:12px;line-height:1.35;color:#56657a}
+.pm-item .check{align-self:center;margin:0 0 0 auto;color:var(--accent);visibility:hidden}
+.pm-item[aria-checked="true"] .check{visibility:visible}
+@media (max-width:1080px){.pm-anchor{left:auto;right:12px;top:8px}}
+
+/* Knapp i margen for sider som er lagt til */
+.page-ctl{position:absolute;top:40mm;right:3.5mm;width:8mm;height:8mm;padding:0;display:grid;place-items:center;border:1px solid #cad3dd;border-radius:1.8mm;background:#fff;color:#243450;cursor:pointer;box-shadow:0 1px 2px rgba(20,30,50,.1)}
+.page-ctl:hover{border-color:#9fb6d6;background:#edf3fb}
+.page-ctl[data-page-act="unbreak"]:hover{border-color:#b3261e;background:#fdf1f0;color:#b3261e}
+.page-ctl svg{width:4.6mm;height:4.6mm}
 
 .toast{position:fixed;left:50%;bottom:22px;z-index:60;max-width:min(92vw,560px);padding:10px 16px;border-radius:9px;background:var(--navy);color:#fff;font:500 13.5px/1.35 system-ui,sans-serif;box-shadow:0 8px 24px rgba(10,20,40,.3);opacity:0;transform:translate(-50%,12px);pointer-events:none;transition:opacity .18s,transform .18s}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -162,7 +197,8 @@ body.locked .gate{display:grid}
 @page{size:A4;margin:0}
 @media print{
   body{background:#fff}
-  .gate,.toolbar,.toast,.ctrl,.hint,.slot.empty,.slot-rm{display:none!important}
+  .gate,.toolbar,.toast,.ctrl,.hint,.slot.empty,.slot-rm,.page-menu,.page-ctl{display:none!important}
+  .doc-section{width:auto}
   .pages,#docPages{display:block;padding:0}
   .page{margin:0;box-shadow:none;break-after:page;page-break-after:always}
   #docPages .page:last-child{break-after:auto;page-break-after:auto}
@@ -198,6 +234,7 @@ body.locked .gate{display:grid}
     <button type="button" class="tb-btn" id="btnOpen"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5A1.5 1.5 0 0 1 5 5h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z"/></svg>Åpne utkast</button>
     <button type="button" class="tb-btn" id="btnSave"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>Lagre utkast</button>
     <button type="button" class="tb-btn" id="btnClear"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4"/></svg><span>Tøm skjema</span></button>
+    <button type="button" class="tb-btn tb-switch" id="btnPageNo" role="switch" aria-checked="true" title="Vis sidetall nederst til høyre på hver side"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 4 7.5 20M16.5 4l-2 16M4.5 9h15.5M3.5 15h15.5"/></svg>Sidetall<span class="sw" aria-hidden="true"></span></button>
     <button type="button" class="tb-btn primary" id="btnPrint"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1.5 1.5 0 0 1-1.5-1.5v-5A1.5 1.5 0 0 1 5 9h14a1.5 1.5 0 0 1 1.5 1.5v5A1.5 1.5 0 0 1 19 17h-2M7 14h10v6H7z"/></svg>Skriv ut / PDF</button>
   </div>
 </header>
@@ -245,11 +282,23 @@ body.locked .gate{display:grid}
     </table>
 
     <div class="spacer"></div>
-    <footer class="page-foot">NORFELT AS &nbsp;|&nbsp; NDT Tjenester &nbsp;|&nbsp; Inspeksjon • Kontroll • Dokumentasjon</footer>
+    <footer class="page-foot">NORFELT AS &nbsp;|&nbsp; NDT Tjenester &nbsp;|&nbsp; Inspeksjon • Kontroll • Dokumentasjon<span class="page-no"></span></footer>
   </section>
 
   <!-- ============ DOKUMENTASJON: sider bygges automatisk ============ -->
-  <div id="docPages" aria-label="Indikasjoner, dokumentasjon og konklusjon"></div>
+  <div class="doc-section">
+    <div class="page-menu">
+      <div class="pm-anchor">
+        <button type="button" class="pm-toggle" id="pmToggle" aria-haspopup="menu" aria-expanded="false" aria-controls="pmItems"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5h8l3 3v11h-11z"/><path d="M5 7v13.5h11"/></svg>Sider<svg class="i chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="pm-items" id="pmItems" role="menu" aria-label="Sideoppsett for dokumentasjonen" hidden>
+          <button type="button" class="pm-item" role="menuitemcheckbox" aria-checked="false" data-page="full"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17H6z"/><path d="M9 8h6M9 11.5h6M9 15h6"/></svg><span><b>Full side</b><small></small></span><svg class="i check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+          <button type="button" class="pm-item" role="menuitem" data-page="with-result"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17H6z"/><path d="M12 9v6M9 12h6"/></svg><span><b>Ny side med resultat</b><small>Legger til en side med resultatet nederst.</small></span></button>
+          <button type="button" class="pm-item" role="menuitem" data-page="new-full"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="10" height="14.5" rx="1"/><path d="M8 3.5h12v14.5h-3.5"/></svg><span><b>Ny full side</b><small>Legger til en hel side – resultatet får egen side.</small></span></button>
+        </div>
+      </div>
+    </div>
+    <div id="docPages" aria-label="Indikasjoner, dokumentasjon og konklusjon"></div>
+  </div>
 </main>
 
 <!-- Mal for hver side i dokumentasjonsdelen (topptekst gjentas på alle sider) -->
@@ -265,31 +314,26 @@ body.locked .gate{display:grid}
       <tr class="subhead"><th>Skisse / målepunkter</th><th>Bilde / dokumentasjon</th></tr>
     </table>
     <div class="doc-content"></div>
-    <footer class="page-foot">NORFELT AS &nbsp;|&nbsp; NDT Tjenester &nbsp;|&nbsp; Inspeksjon • Kontroll • Dokumentasjon</footer>
+    <footer class="page-foot">NORFELT AS &nbsp;|&nbsp; NDT Tjenester &nbsp;|&nbsp; Inspeksjon • Kontroll • Dokumentasjon<span class="page-no"></span></footer>
   </section>
 </template>
 
 <div hidden id="holder">
-  <div class="hint" id="docHint">
-    <p>Bruk «Legg til» i verktøylinjen for tekst, bilder og skisser – eller lim inn / dra bilder hit.</p>
-    <p>Denne teksten vises bare på skjermen.</p>
-  </div>
 
   <!-- ================= RESULTAT / KONKLUSJON (brytes aldri over to sider) ================= -->
   <div class="result-wrap" id="resultBlock">
     <table class="grid result">
-      <colgroup><col style="width:30mm"><col style="width:42mm"><col style="width:42mm"><col style="width:22mm"><col style="width:15mm"><col style="width:29mm"></colgroup>
+      <colgroup><col style="width:30mm"><col style="width:34mm"><col style="width:50mm"><col style="width:15mm"><col style="width:15mm"><col style="width:36mm"></colgroup>
       <tr><th colspan="6" class="band">RESULTAT / KONKLUSJON</th></tr>
       <tr>
         <th>Resultat</th>
         <td><div class="f" data-field="res_resultat">Godkjent</div></td>
         <th class="lbl-check">Avvik registrert<button class="cb" data-check="res_avvik" aria-checked="false" aria-label="Avvik registrert"></button></th>
-        <th colspan="3">Oppdragsgiver godkjenning:</th>
+        <th colspan="3" class="lbl-check">Oppdragsgiver godkjenning:<button class="cb" data-check="res_oppdragsgiver" aria-checked="false" aria-label="Oppdragsgiver godkjenning"></button></th>
       </tr>
-      <tr class="r-tall">
+      <tr>
         <th>Sertifikat nr.:</th>
-        <td colspan="2"><div class="f" data-field="res_sertifikat">EN ISO 9712 UT N3</div></td>
-        <td colspan="3"><div class="f" data-field="res_oppdragsgiver_godkjenning"></div></td>
+        <td colspan="5"><div class="f" data-field="res_sertifikat">EN ISO 9712 UT N3</div></td>
       </tr>
       <tr class="r-comment"><th>Kommentar / tiltak:</th><td colspan="5"><div class="f" data-field="res_kommentar"></div></td></tr>
       <tr><th>Kontrollert omfang:</th><td colspan="5"><div class="f" data-field="res_omfang">Alle opphengsbolter og vippebolter</div></td></tr>
@@ -323,16 +367,16 @@ const FORMAT = 'norfelt-ut-rapport';
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-const state = { logo: null, blocks: [] };
+const state = { logo: null, blocks: [], resultOwnPage: false };
 const nodes = new Map();
 let armed = { id: null, until: 0 };
+let activeSeg = null;   // valgt side (segment) for nytt innhold
 let activeId = null, paginating = false, dirty = false, timer = 0, seq = 0, lastEditedPage = null, pickTarget = null;
 
 const docRoot = $('#docPages');
 const pagesEl = $('#pages');
 const tplPage = $('#tplDocPage');
 const resultEl = $('#resultBlock');
-const hintEl = $('#docHint');
 const fileImg = $('#fileImg'), fileJson = $('#fileJson'), fileLogo = $('#fileLogo');
 
 /* ---------- Passord ---------- */
@@ -364,7 +408,9 @@ const ICON = {
   down: '<path d="M12 5v14M6 13l6 6 6-6"/>',
   del: '<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/>',
   x: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>'
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  pageMinus: '<path d="M6 3.5h8l4 4v13H6z"/><path d="M9.5 14h5"/>',
+  toTop: '<path d="M12 20V9M7.5 13.5 12 9l4.5 4.5M5 4.5h14"/>'
 };
 const svg = p => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
 const h = (tag, cls, props) => { const e = document.createElement(tag); if (cls) e.className = cls; if (props) Object.assign(e, props); return e; };
@@ -538,8 +584,13 @@ function paginate() {
   docRoot.style.minHeight = docRoot.offsetHeight + 'px';
   docRoot.replaceChildren();
 
-  let content = newPage();
-  const next = () => { content = newPage(); };
+  let seg = '', content;
+  const open = kind => {                     // manual = start på segment, flow = automatisk, result = egen resultatside
+    content = newPage();
+    content.parentElement.dataset.seg = seg;
+    content.parentElement.dataset.kind = kind;
+  };
+  const next = () => open('flow');
   const place = el => {
     content.append(el);
     $$('textarea', el).forEach(autosize);
@@ -566,11 +617,15 @@ function paginate() {
     }
   };
 
-  if (!state.blocks.length) { content.classList.add('empty'); place(hintEl); }
-  for (const b of state.blocks) (b.type === 'text' ? placeText(b) : place(nodeFor(b)));
+  open('manual');
+  for (const b of state.blocks) {
+    if (b.type === 'break') { seg = b.id; open('manual'); }
+    else if (b.type === 'text') placeText(b);
+    else place(nodeFor(b));
+  }
+  if (state.resultOwnPage) open('result');
   place(resultEl);
-
-  $$('.blk', docRoot).forEach(n => n.classList.toggle('active', n.dataset.id === activeId));
+  decoratePages();
   docRoot.style.minHeight = '';
   window.scrollTo(sx, sy);
   restoreFocus(focus);
@@ -641,12 +696,21 @@ docRoot.addEventListener('focusout', () => {
   if (!lastEditedPage || lastEditedPage !== docRoot.lastElementChild) schedule(80);  // kan trekke innhold opp igjen
   else dirty = false;
 });
-function setActive(id) {
-  activeId = id;
-  $$('.blk', docRoot).forEach(n => n.classList.toggle('active', n.dataset.id === id));
+function markActive() {
+  $$('.blk', docRoot).forEach(n => n.classList.toggle('active', n.dataset.id === activeId));
+  $$('.doc-page', docRoot).forEach(p => p.classList.toggle('target', !activeId && activeSeg !== null && p.dataset.seg === activeSeg));
 }
+function setActive(id) { activeId = id; activeSeg = null; markActive(); }
+function setTarget(seg) { activeId = null; activeSeg = seg; markActive(); }
 docRoot.addEventListener('focusin', e => { const blk = e.target.closest('.blk'); if (blk) setActive(blk.dataset.id); });
-docRoot.addEventListener('pointerdown', e => { const blk = e.target.closest('.blk'); setActive(blk ? blk.dataset.id : null); });
+docRoot.addEventListener('pointerdown', e => {
+  if (e.target.closest('.page-ctl')) return;
+  const blk = e.target.closest('.blk');
+  if (blk) { setActive(blk.dataset.id); return; }
+  const pg = e.target.closest('.doc-page');
+  if (pg && !pg.classList.contains('result-only') && e.target.closest('.doc-content') && !e.target.closest('#resultBlock')) setTarget(pg.dataset.seg);
+  else setActive(null);
+});
 
 function setArmedLook(id, on) {
   $$(`.blk[data-id="${id}"] [data-act="del"]`, docRoot).forEach(btn => {
@@ -667,6 +731,8 @@ function move(i, j) {
   keepInView(b.id);
 }
 docRoot.addEventListener('click', e => {
+  const pa = e.target.closest('[data-page-act]');
+  if (pa) { removePage(pa); return; }
   const btn = e.target.closest('[data-act]');
   const blk = btn && btn.closest('.blk');
   const b = blk && byId(blk.dataset.id);
@@ -689,7 +755,8 @@ docRoot.addEventListener('click', e => {
       armed.id = null;
       state.blocks.splice(i, 1);
       nodes.delete(b.id);
-      activeId = state.blocks.length ? state.blocks[Math.max(0, i - 1)].id : null;
+      activeId = null;
+      activeSeg = blk.closest('.doc-page').dataset.seg;
       paginate();
       break;
     case 'pick': pickImage({ id: b.id, ci: +cellEl.dataset.ci }); break;
@@ -704,11 +771,22 @@ docRoot.addEventListener('click', e => {
 });
 
 /* ---------- Legg til innhold ---------- */
+function insertIndex() {
+  const len = state.blocks.length;
+  if (activeId) { const i = indexOf(activeId); if (i >= 0) return i + 1; }      // etter valgt blokk
+  if (activeSeg !== null) {                                                     // sist på valgt side
+    const bi = activeSeg ? indexOf(activeSeg) : -1;
+    if (activeSeg && bi < 0) return len;
+    let j = bi + 1;
+    while (j < len && state.blocks[j].type !== 'break') j++;
+    return j;
+  }
+  return len;                                                                   // ellers sist
+}
 function insert(blocks) {
-  let i = activeId ? indexOf(activeId) : -1;
-  i = i < 0 ? state.blocks.length : i + 1;      // etter valgt blokk, ellers sist
-  state.blocks.splice(i, 0, ...blocks);
+  state.blocks.splice(insertIndex(), 0, ...blocks);
   activeId = blocks[blocks.length - 1].id;
+  activeSeg = null;
 }
 function addText() {
   const b = { id: newId(), type: 'text', text: '' };
@@ -786,8 +864,9 @@ function dropTarget(t, files) {
     const b = byId(cell.closest('.blk').dataset.id);
     if (b && !b.cells[+cell.dataset.ci].src) { setCellImage(b.id, +cell.dataset.ci, files[0]); return; }
   }
-  const blk = t && t.closest('.blk');
-  if (blk) activeId = blk.dataset.id;
+  const blk = t && t.closest('.blk'), pg = t && t.closest('.doc-page');
+  if (blk) { activeId = blk.dataset.id; activeSeg = null; }
+  else if (pg) { activeId = null; activeSeg = pg.dataset.seg; }
   addImages(files);
 }
 document.addEventListener('paste', e => {
@@ -829,7 +908,7 @@ document.addEventListener('click', e => {
   if (e.target.matches('img.logo')) { fileLogo.value = ''; fileLogo.click(); return; }
   const cb = e.target.closest('.cb');
   if (cb) { toggle(cb); return; }
-  const cbCell = e.target.closest('td.c');
+  const cbCell = e.target.closest('td.c, th.lbl-check');
   if (cbCell && !e.target.closest('[data-field]')) { const c = cbCell.querySelector('.cb'); if (c) toggle(c); }
 });
 document.addEventListener('mousedown', e => {
@@ -850,7 +929,8 @@ function serialize() {
   const fields = {}, checks = {};
   $$('[data-field]').forEach(el => { fields[el.dataset.field] = (el.innerText || '').replace(/\n+$/, ''); });
   $$('[data-check]').forEach(el => { checks[el.dataset.check] = el.getAttribute('aria-checked') === 'true'; });
-  return { format: FORMAT, version: 1, saved: new Date().toISOString(), logo: state.logo, fields, checks, blocks: state.blocks };
+  const settings = { pageNumbers: btnPageNo.getAttribute('aria-checked') === 'true', resultOwnPage: state.resultOwnPage };
+  return { format: FORMAT, version: 2, saved: new Date().toISOString(), logo: state.logo, settings, fields, checks, blocks: state.blocks };
 }
 function save() {
   const data = serialize();
@@ -866,6 +946,7 @@ const dataImg = s => (typeof s === 'string' && s.startsWith('data:image/') ? s :
 function cleanBlock(b) {
   if (!b || typeof b !== 'object') return null;
   const id = newId();
+  if (b.type === 'break') return { id, type: 'break' };
   if (b.type === 'text') return { id, type: 'text', text: String(b.text ?? '') };
   if (b.type === 'image' && dataImg(b.src)) return { id, type: 'image', src: b.src, w: +b.w || 0, h: +b.h || 0, size: SIZES.includes(b.size) ? b.size : 100, caption: String(b.caption ?? '') };
   if (b.type === 'pair') {
@@ -883,8 +964,11 @@ async function openFile(file) {
     $$('[data-check]').forEach(el => el.setAttribute('aria-checked', data.checks && data.checks[el.dataset.check] ? 'true' : 'false'));
     state.logo = dataImg(data.logo);
     state.blocks = (Array.isArray(data.blocks) ? data.blocks : []).map(cleanBlock).filter(Boolean);
+    state.resultOwnPage = !!(data.settings && data.settings.resultOwnPage);
+    setPageNumbers(!(data.settings && data.settings.pageNumbers === false));
     nodes.clear();
     activeId = null;
+    activeSeg = null;
     updateLogos();
     paginate();
     toast('Utkast åpnet');
@@ -896,8 +980,10 @@ function clearForm() {
   $$('[data-field]').forEach(el => { el.textContent = ''; });
   $$('[data-check]').forEach(el => el.setAttribute('aria-checked', 'false'));
   state.blocks = [];
+  state.resultOwnPage = false;
   nodes.clear();
   activeId = null;
+  activeSeg = null;
   paginate();
   window.scrollTo({ top: 0, behavior: smooth() });
   toast('Skjemaet er tømt');
@@ -923,6 +1009,109 @@ function toast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 3400);
 }
+
+/* ---------- Sider: meny, sideskift og sidetall ---------- */
+const pmToggle = $('#pmToggle'), pmItems = $('#pmItems'), btnPageNo = $('#btnPageNo'), tbEl = $('.toolbar');
+
+function hintNode() {
+  const d = h('div', 'hint');
+  d.innerHTML = '<p>Klikk på siden og bruk «Legg til» for tekst, bilder og skisser – eller lim inn / dra bilder hit.</p><p>Vises bare på skjermen.</p>';
+  return d;
+}
+function pageCtl(act, label, icon) {
+  const b = h('button', 'page-ctl', { type: 'button', title: label, innerHTML: svg(icon) });
+  b.setAttribute('aria-label', label);
+  b.dataset.pageAct = act;
+  return b;
+}
+function decoratePages() {
+  $$('.doc-page', docRoot).forEach(pg => {
+    const c = pg.querySelector('.doc-content'), kind = pg.dataset.kind;
+    pg.classList.toggle('result-only', kind !== 'manual' && c.contains(resultEl) && !c.querySelector('.blk'));
+    if (kind === 'manual' && !c.querySelector('.blk')) { c.classList.add('empty'); c.prepend(hintNode()); }   // tom side: resultat nederst
+    if (kind === 'manual' && pg.dataset.seg) pg.append(pageCtl('unbreak', 'Fjern denne siden (innholdet flyttes opp)', ICON.pageMinus));
+    if (kind === 'result') pg.append(pageCtl('unown', 'Flytt resultatet tilbake til forrige side', ICON.toTop));
+  });
+  const all = $$('.page');
+  all.forEach((p, i) => { const n = p.querySelector('.page-no'); if (n) n.textContent = `Side ${i + 1} av ${all.length}`; });
+  markActive();
+  updateMenu();
+}
+const pageNo = el => $$('.page').indexOf(el) + 1;
+
+function removePage(btn) {
+  const pg = btn.closest('.doc-page');
+  if (btn.dataset.pageAct === 'unbreak') {
+    const i = indexOf(pg.dataset.seg);
+    if (i >= 0) state.blocks.splice(i, 1);
+    if (activeSeg === pg.dataset.seg) activeSeg = null;
+    paginate();
+    toast('Siden er fjernet');
+  } else {
+    state.resultOwnPage = false;
+    paginate();
+    toast('Resultatet er flyttet tilbake');
+  }
+}
+function updateMenu() {
+  const full = pmItems.querySelector('[data-page="full"]');
+  full.setAttribute('aria-checked', String(state.resultOwnPage));
+  full.querySelector('small').textContent = state.resultOwnPage
+    ? 'På: resultatet står på egen side. Trykk for å flytte det tilbake.'
+    : 'Skanneområdet fyller hele siden – resultatet flyttes til ny side.';
+}
+function setMenu(open) {
+  pmItems.hidden = !open;
+  pmToggle.setAttribute('aria-expanded', String(open));
+  if (open) pmItems.querySelector('.pm-item').focus();
+}
+function scrollToPage(pg) {
+  if (!pg) return;
+  const top = pg.getBoundingClientRect().top, tb = tbEl.offsetHeight;
+  if (top > tb && top < window.innerHeight * 0.5) return;
+  window.scrollTo({ top: window.scrollY + top - tb - 14, behavior: smooth() });
+}
+pmToggle.addEventListener('click', () => setMenu(pmItems.hidden));
+document.addEventListener('pointerdown', e => { if (!pmItems.hidden && !e.target.closest('.pm-anchor')) setMenu(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pmItems.hidden) { setMenu(false); pmToggle.focus(); } });
+pmItems.addEventListener('keydown', e => {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  const items = $$('.pm-item', pmItems), i = Math.max(0, items.indexOf(document.activeElement));
+  items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+});
+pmItems.addEventListener('click', e => {
+  const it = e.target.closest('[data-page]');
+  if (!it) return;
+  setMenu(false);
+  let pg;
+  if (it.dataset.page === 'full') {
+    state.resultOwnPage = !state.resultOwnPage;
+    paginate();
+    pg = resultEl.closest('.page');
+    toast(state.resultOwnPage ? `Resultatet står nå på egen side (side ${pageNo(pg)}).` : 'Resultatet står igjen sammen med dokumentasjonen.');
+  } else {
+    const br = { id: newId(), type: 'break' };
+    state.blocks.push(br);
+    state.resultOwnPage = it.dataset.page === 'new-full';
+    activeId = null;
+    activeSeg = br.id;                        // nytt innhold havner på den nye siden
+    paginate();
+    pg = docRoot.querySelector(`.doc-page[data-seg="${br.id}"]`);
+    toast(state.resultOwnPage ? `Ny side lagt til (side ${pageNo(pg)}). Resultatet har egen side.` : `Ny side lagt til (side ${pageNo(pg)}) med resultatet nederst.`);
+  }
+  scrollToPage(pg);
+});
+
+function setPageNumbers(on) {
+  document.body.classList.toggle('no-pageno', !on);
+  btnPageNo.setAttribute('aria-checked', String(on));
+}
+btnPageNo.addEventListener('click', () => setPageNumbers(btnPageNo.getAttribute('aria-checked') !== 'true'));
+
+const setTbH = () => document.documentElement.style.setProperty('--tb-h', tbEl.offsetHeight + 'px');
+if ('ResizeObserver' in window) new ResizeObserver(setTbH).observe(tbEl);
+setTbH();
 
 /* ---------- Start ---------- */
 updateLogos();

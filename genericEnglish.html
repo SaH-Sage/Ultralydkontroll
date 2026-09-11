@@ -1,0 +1,2576 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EnglishForm</title>
+<style>
+:root{
+  --navy:#16233f;
+  --navy-line:#44536e;
+  --label-a:#d3e3ef;
+  --label-b:#e9f2f8;
+  --pale:#eef4f8;
+  --line:#8c99a8;
+  --ink:#151a22;
+  --desk:#cfd5dc;
+  --accent:#2f6fdb;
+  --cw:180mm;
+  --split:72mm;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:Arial,"Liberation Sans","Helvetica Neue",Helvetica,sans-serif}
+button{font:inherit;color:inherit}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Toolbar ---------- */
+.toolbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;padding:9px 18px;background:var(--navy);color:#fff;font:500 13.5px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-shadow:0 4px 14px rgba(10,20,40,.25)}
+.tb-title{font-weight:650;white-space:nowrap;margin-right:6px}
+.tb-title small{display:block;margin-top:2px;font-size:11.5px;font-weight:400;opacity:.65}
+.tb-group{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.tb-label{opacity:.7;margin-right:2px}
+.tb-spacer{flex:1}
+.tb-btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border-radius:7px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;cursor:pointer;white-space:nowrap}
+.tb-btn:hover{background:rgba(255,255,255,.15)}
+.tb-btn svg{width:16px;height:16px;flex:none}
+.tb-btn.primary{background:#fff;border-color:#fff;color:var(--navy);font-weight:650}
+.tb-btn.primary:hover{background:#e3ecf7}
+.tb-btn.warn,.tb-btn.warn:hover{background:#b3261e;border-color:#b3261e;color:#fff}
+.tb-btn:focus-visible,.hint button:focus-visible,.ctrl button:focus-visible,.slot-add:focus-visible,.slot-rm:focus-visible{outline:2px solid #8db5ff;outline-offset:2px}
+.tb-switch .sw{position:relative;flex:none;width:28px;height:16px;border-radius:8px;background:rgba(255,255,255,.28);transition:background .15s}
+.tb-switch .sw::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .15s}
+.tb-switch[aria-checked="true"] .sw{background:#4c8dff}
+.tb-switch[aria-checked="true"] .sw::after{transform:translateX(12px)}
+@media (max-width:1400px){.tb-label,.tb-title small,.tb-long{display:none}.toolbar{gap:8px 10px;padding:9px 14px}.tb-btn{padding:0 10px}}
+
+/* ---------- Sheets ---------- */
+.pages{position:relative;display:flex;flex-direction:column;align-items:center;align-items:safe center;gap:10mm;padding:10mm 12px var(--end-room,24mm)}
+#docPages{display:flex;flex-direction:column;gap:10mm}
+#docPages,.measure-wrap{zoom:var(--doc-zoom,1)}          /* scaled to fit the screen width on phones and small tablets */
+.part{position:relative;display:flex;flex-direction:column;gap:10mm}
+.page{position:relative;flex:none;width:210mm;height:297mm;overflow:hidden;display:flex;flex-direction:column;padding:7mm 15mm 0;background:#fff;font-size:10pt;line-height:1.2;box-shadow:0 1px 2px rgba(20,30,50,.18),0 10px 28px rgba(20,30,50,.16)}
+.page-head{position:relative;flex:none;height:27mm}
+.titles{position:absolute;left:50%;top:50%;width:170mm;transform:translate(-50%,-52%);text-align:center;white-space:nowrap;font-weight:700;line-height:1.25}
+.titles .f{display:inline-block;min-width:60mm;max-width:170mm}
+.titles .t1{font-size:13.5pt}
+.titles .t2{font-size:15.5pt}
+.doc-page .titles .t1{font-size:12.5pt}
+.doc-page .titles .t2{font-size:13.5pt}
+.report-page .titles .t1{font-size:13.5pt}
+.report-page .titles .t2{font-size:15.5pt}
+.spacer{flex:1}
+.page-foot{position:relative;flex:none;height:16mm;display:flex;align-items:center;justify-content:center;font-size:7.5pt;color:#1c2230}
+.page-no{position:absolute;right:0;top:50%;transform:translateY(-50%);white-space:nowrap}
+body.no-pageno .page-no{display:none}
+.foot-text{display:inline-block;min-width:70mm;max-width:130mm;text-align:center}
+
+/* ---------- Tables ---------- */
+table.grid{flex:none;width:var(--cw);border-collapse:collapse;table-layout:fixed}
+.page-head + table.grid{margin-top:4mm}
+table.grid + table.grid{margin-top:-0.25mm}
+.grid th,.grid td{height:8mm;padding:0.7mm 1.3mm;border:0.25mm solid var(--line);vertical-align:middle;text-align:left;font-size:10pt;line-height:1.2}
+.grid th{font-weight:700;background:linear-gradient(90deg,var(--label-a),var(--label-b))}
+.grid th.band{height:6.6mm;padding:0 2mm;border-color:var(--navy);background:var(--navy);color:#fff;text-align:center;font-size:12pt;letter-spacing:.02em}
+.checks .colhead th{height:6mm;border-color:var(--navy-line);background:var(--navy);color:#fff;text-align:center;font-size:9pt}
+.checks .group td{height:5.6mm;padding-top:0.3mm;padding-bottom:0.3mm;background:var(--pale);font-weight:700}
+.checks td.c,.checks td.c .f{text-align:center}
+.band-table .subhead th,.head-table .subhead th,.sband-table .subhead th{height:6mm;text-align:center;font-size:9.5pt}
+
+/* Editable fields */
+.f{position:relative;min-height:1.2em;white-space:pre-wrap;overflow-wrap:anywhere;outline:none;border-radius:0.5mm}
+td:has(> .f){cursor:text}
+td.c{cursor:pointer}
+@media screen{
+  .f:hover{background:rgba(47,111,219,.07)}
+  .f:focus{background:#fff6d6;box-shadow:0 0 0 0.6mm #fff6d6}
+  .f.is-empty::before{content:attr(data-hint);position:absolute;left:0;right:0;top:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#9aa6b5;font-style:italic;font-weight:400;pointer-events:none}
+}
+.cb{display:inline-block;vertical-align:middle;width:3.5mm;height:3.5mm;margin:0;padding:0;border:0.28mm solid #1b1f27;background:#fff;color:#1b1f27;line-height:0;cursor:pointer}
+.cb svg{display:block;width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.25;stroke-linecap:square}
+.cb[aria-checked="false"] svg{visibility:hidden}
+.cb:focus-visible{outline:0.5mm solid var(--accent);outline-offset:0.4mm}
+@media screen{.cb:hover{box-shadow:0 0 0 0.7mm rgba(47,111,219,.2)}}
+.lbl-check{white-space:nowrap}
+.lbl-check .cb{position:relative;top:-0.2mm;margin-left:2.2mm}
+
+/* Result / conclusion */
+.result-wrap{width:var(--cw);margin-top:6mm}
+.result .r-comment>*{height:17mm}
+.result .r-comment td{vertical-align:top;padding-top:1.3mm}
+.result .r-sign>*{height:12mm}
+
+/* ---------- Documentation section ---------- */
+.band-table{margin-top:4mm}
+.doc-content{position:relative;flex:1 1 auto;min-height:0;margin-top:5mm}
+.doc-content>:first-child{margin-top:0}
+.blk{position:relative;width:var(--cw)}
+.blk+.blk{margin-top:4mm}
+.ta,.mirror{display:block;width:100%;margin:0;padding:0.6mm 1mm;border:0;font:inherit;font-size:10pt;line-height:1.38;color:var(--ink);white-space:pre-wrap;overflow-wrap:break-word}
+.ta{resize:none;overflow:hidden;background:transparent;outline:none;border-radius:0.8mm}
+.mirror{display:none}
+.cap{font-size:9pt;text-align:center;color:#2a3140}
+@media screen{
+  .ta{padding-right:1.7mm}
+  .ta::placeholder{color:#8a96a6}
+  .ta:hover{background:rgba(47,111,219,.06)}
+  .ta:focus{background:#fff6d6}
+}
+.im{display:block;max-width:none;object-fit:contain}
+.blk-image .fig{margin:0 auto}
+.blk-image .im{margin:0 auto 1mm}
+.blk-pair{display:grid;grid-template-columns:var(--split) 1fr}
+.blk-pair .cell{min-width:0;padding-right:3mm}
+.blk-pair .cell+.cell{padding:0 0 0 3mm;border-left:0.25mm solid #c2cbd5}
+.imwrap{position:relative;margin:0 auto 1.2mm}
+.imwrap .im{cursor:pointer}
+.slot-add{display:flex;align-items:center;justify-content:center;gap:2mm;width:100%;height:26mm;margin-bottom:1.2mm;border:0.35mm dashed #9aabbf;border-radius:1.6mm;background:#f5f8fb;color:#3d4f67;font:600 9.5pt system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer}
+.slot-add:hover{border-color:var(--accent);background:#eaf1f8;color:var(--accent)}
+.slot-add svg{width:4.2mm;height:4.2mm}
+.slot-rm{position:absolute;top:1.2mm;right:1.2mm;width:6.5mm;height:6.5mm;padding:0;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(20,30,50,.75);color:#fff;cursor:pointer;opacity:0}
+.slot-rm svg{width:3.6mm;height:3.6mm}
+.imwrap:hover .slot-rm,.slot-rm:focus-visible{opacity:1}
+
+/* Two-column rows: draggable divider */
+.col-handle{position:absolute;top:-1mm;bottom:-1mm;left:var(--split);z-index:3;width:4mm;margin-left:-2mm;cursor:col-resize;touch-action:none;outline:none}
+.col-handle::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:0.7mm;margin-left:-0.35mm;border-radius:0.35mm;background:transparent;transition:background .12s}
+.col-handle::before{content:"";position:absolute;top:50%;left:50%;z-index:1;width:2.4mm;height:8mm;transform:translate(-50%,-50%);border:1px solid #9fb6d6;border-radius:1.2mm;background:#fff;box-shadow:0 1px 3px rgba(20,30,50,.18);opacity:0;transition:opacity .12s}
+.blk-pair:hover>.col-handle::before,.col-handle:focus-visible::before,.blk.resizing>.col-handle::before{opacity:1}
+.col-handle:hover::after,.col-handle:focus-visible::after,.blk.resizing>.col-handle::after{background:var(--accent)}
+.split-badge{position:absolute;top:-6.5mm;left:50%;transform:translateX(-50%);padding:1px 7px;border-radius:9px;background:var(--navy);color:#fff;font:600 11px/1.5 system-ui,sans-serif;white-space:nowrap;opacity:0;pointer-events:none}
+.blk.resizing>.col-handle .split-badge,.col-handle:focus-visible .split-badge{opacity:1}
+body.dragging-split,body.dragging-split *{cursor:col-resize!important;user-select:none}
+
+/* Web content */
+.embed-empty{margin-bottom:1.2mm;padding:3mm;border:0.35mm dashed #9aabbf;border-radius:1.6mm;background:#f5f8fb;color:#3d4f67;font:400 9pt/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.embed-empty b{display:block;margin-bottom:1.5mm;font-weight:650;color:var(--navy)}
+.embed-empty p{margin:1.5mm 0 0;color:#5b6b80}
+.embed-row{display:flex;gap:1.5mm}
+.embed-input{flex:1;min-width:0;height:8mm;padding:0 2mm;border:1px solid #b9c4d1;border-radius:1.2mm;background:#fff;color:var(--ink);font:inherit}
+.embed-input:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.embed-go{height:8mm;padding:0 3.5mm;border:0;border-radius:1.2mm;background:var(--navy);color:#fff;font:600 9pt system-ui,sans-serif;cursor:pointer}
+.embed-go:hover{background:#22345a}
+.embed-frame{display:grid;place-items:center;border-radius:1mm;background:#e9eef3;color:#7a889a;font:400 9pt system-ui,sans-serif}
+.embed-bar{display:flex;align-items:center;gap:2.5mm;margin:1mm 0 1.2mm;color:#3d4f67;font:500 8.5pt/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.embed-bar .lbl{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.embed-bar a,.embed-bar button{padding:0;border:0;background:none;color:var(--accent);font:inherit;white-space:nowrap;text-decoration:none;cursor:pointer}
+.embed-bar a:hover,.embed-bar button:hover{text-decoration:underline}
+.embed-print{display:none}
+.embed-layer{position:absolute;inset:0;z-index:5;pointer-events:none}
+.embed-live{position:absolute;overflow:hidden;border-radius:1mm;background:#e9eef3;pointer-events:auto}
+.embed-live iframe{display:block;width:100%;height:100%;border:0}
+
+/* Measurement table */
+.mtable{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9pt;line-height:1.25}
+.mtable td{height:6.5mm;padding:0.6mm 1mm;border:0.25mm solid var(--line);vertical-align:top}
+.mtable tr:first-child td{font-weight:700;background:linear-gradient(90deg,var(--label-a),var(--label-b))}
+.tc{min-height:1.25em;white-space:pre-wrap;overflow-wrap:anywhere;outline:none;border-radius:0.4mm}
+@media screen{.tc:hover{background:rgba(47,111,219,.07)}.tc:focus{background:#fff6d6}}
+.tbl-tools{display:flex;flex-wrap:wrap;gap:1.2mm;margin:1.2mm 0}
+.tbl-tools button{height:6mm;padding:0 2mm;border:1px solid #cad3dd;border-radius:1.2mm;background:#fff;color:#243450;font:600 8pt system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer}
+.tbl-tools button:hover{border-color:#9fb6d6;background:#edf3fb}
+
+/* Toolbar dropdown */
+.tb-dd{position:relative}
+.tb-dd .chev{width:14px;height:14px;margin-left:-2px;transition:transform .15s}
+.tb-dd>.tb-btn[aria-expanded="true"]{background:rgba(255,255,255,.18)}
+.tb-dd>.tb-btn[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.dd-menu{position:absolute;top:calc(100% + 8px);left:0;width:330px;padding:6px;border:1px solid #cdd5df;border-radius:10px;background:#fff;box-shadow:0 12px 30px rgba(20,30,50,.25)}
+.dd-menu[hidden]{display:none}
+.dd-note{margin:4px 8px;padding-top:8px;border-top:1px solid #e3e8ef;color:#56657a;font-size:12px;line-height:1.4}
+
+/* Table sections */
+.sec-band{position:relative;cursor:pointer}
+.sec-band:focus-visible{outline:2px solid #8db5ff;outline-offset:-3px}
+@media screen{.grid th.sec-band:hover{background:#22345a}}
+.sec-gear{position:absolute;right:2.2mm;top:50%;width:4.2mm;height:4.2mm;transform:translateY(-50%);opacity:.55}
+.sec-gear svg{display:block;width:100%;height:100%}
+.sec-band:hover .sec-gear,.sec-band:focus-visible .sec-gear{opacity:1}
+.sec-table .colhead .f.is-empty::before{color:rgba(255,255,255,.55)}
+.sec-table .colhead .f{overflow-wrap:normal}
+.sec-table tbody tr>:first-child{position:relative}
+.row-del{position:absolute;left:-9mm;top:50%;width:6mm;height:6mm;padding:0;display:grid;place-items:center;border:1px solid #cad3dd;border-radius:50%;background:#fff;color:#8a2a22;cursor:pointer;opacity:0;transform:translateY(-50%)}
+.row-del svg{width:3.4mm;height:3.4mm}
+.sec-table tbody tr:hover .row-del,.row-del:focus-visible{opacity:1}
+.doc-page.solo .band-table{display:none}
+.doc-page.solo .doc-content{margin-top:4mm}
+.doc-page.band-inline .band-table{display:none}
+.doc-page.band-inline .doc-content{margin-top:4mm}
+.doc-page.no-title .band-table tr:first-child{display:none}
+.doc-page.no-title.no-heads .band-table,.doc-page.no-title.head-top .band-table{display:none}
+.doc-page.no-title.no-heads .doc-content,.doc-page.no-title.head-top .doc-content{margin-top:4mm}
+.report-page .doc-content{margin-top:4mm}
+.report-page .blk-sec+.blk-sec{margin-top:-0.25mm}
+.doc-content.has-bottom{display:flex;flex-direction:column}
+.doc-content.has-bottom>*{flex-shrink:0}
+.doc-content>.at-bottom{margin-top:auto!important}
+.sec-pop{position:absolute;z-index:40;width:370px;overflow:auto;overscroll-behavior:contain;max-width:calc(100vw - 24px);padding:12px 14px;border:1px solid #cdd5df;border-radius:12px;background:#fff;color:var(--ink);font:400 13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-shadow:0 14px 34px rgba(20,30,50,.25)}
+.sec-pop[hidden]{display:none}
+.sp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sp-head b{font-size:14px;color:var(--navy)}
+.sp-x{width:28px;height:28px;padding:0;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#56657a;cursor:pointer}
+.sp-x:hover{background:#eef3fa}
+.sp-x svg{width:16px;height:16px}
+.sp-lbl{display:block;margin-bottom:4px;font-weight:600}
+.sp-input{width:100%;height:34px;padding:0 10px;border:1px solid #b9c4d1;border-radius:7px;font:inherit;font-size:14px}
+.sp-input:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.sec-pop fieldset{margin:10px 0 0;padding:0;border:0}
+.sec-pop legend{margin-bottom:2px;padding:0;font-weight:600}
+.sp-opt{display:flex;align-items:flex-start;gap:8px;padding:4px 6px;border-radius:7px;cursor:pointer}
+.sp-opt:hover{background:#f1f5fa}
+.sp-opt input{margin:3px 0 0;accent-color:var(--navy)}
+.sp-opt b{display:block;font-weight:600}
+.sp-opt small{display:block;color:#56657a;font-size:12px}
+.sp-pair{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.sec-pop fieldset[disabled]{opacity:.5}
+.sec-pop fieldset[disabled] .sp-opt{cursor:default}
+.sp-note{margin:4px 6px 0;color:#56657a;font-size:12px}
+.sp-check{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:7px;cursor:pointer}
+.sp-check:hover{background:#f1f5fa}
+.sp-check input{margin:0;accent-color:var(--navy)}
+.sp-cols{display:grid;gap:4px;margin-top:4px}
+.sp-hrow{display:grid;grid-template-columns:16px 1fr 38px 28px;align-items:center;gap:6px;padding:0 2px 0 6px}
+.sp-hrow .sp-input{height:32px;font-size:13px}
+.sp-hn{color:#6b7a8f;font-size:12px;text-align:right}
+.sp-hw{color:#56657a;font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+.sp-hx{width:28px;height:28px;padding:0;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#8a2a22;cursor:pointer}
+.sp-hx:hover:not(:disabled){background:#fdf1f0}
+.sp-hx:disabled{opacity:.3;cursor:default}
+.sp-hx svg{width:14px;height:14px}
+.sp-tools button:disabled{opacity:.45;cursor:default}
+.subhead th{position:relative}
+@media screen{.subhead th{cursor:pointer}}
+.head-gear{position:absolute;right:1.5mm;top:50%;width:3.8mm;height:3.8mm;transform:translateY(-50%);color:var(--navy);opacity:0;pointer-events:none;transition:opacity .12s}
+.head-gear svg{display:block;width:100%;height:100%}
+.subhead:hover .head-gear{opacity:.75}
+.doc-page.head-top .band-table .subhead{display:none}
+.blk-head .head-table{width:var(--cw)}
+.blk+.blk-head{margin-top:6mm}
+.blk-head+.blk{margin-top:2.5mm}
+.sband-table{width:var(--cw)}
+.blk-sband.no-heads .subhead{display:none}
+.blk+.blk-sband{margin-top:6mm}
+.blk-sband+.blk{margin-top:3mm}
+.measure-wrap{position:absolute;left:-10000px;top:0;width:210mm;padding:0 15mm;font-size:10pt;line-height:1.2;visibility:hidden;pointer-events:none}
+.measure-wrap .doc-content{margin:0;flex:none}
+.heads-show{position:absolute;right:8mm;top:50%;height:4.6mm;padding:0 2mm;transform:translateY(-50%);border:1px solid rgba(255,255,255,.55);border-radius:2.3mm;background:transparent;color:#fff;font:600 7.5pt system-ui,sans-serif;cursor:pointer}
+.heads-show:hover{background:rgba(255,255,255,.16)}
+.hd-handle{position:absolute;top:-1mm;bottom:-1mm;right:-2mm;z-index:2;width:4mm;cursor:col-resize;touch-action:none;outline:none}
+.hd-handle::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:0.7mm;margin-left:-0.35mm;border-radius:0.35mm;background:transparent;transition:background .12s}
+.hd-handle:hover::after,.hd-handle:focus-visible::after,.hd-handle.dragging::after{background:var(--accent)}
+.hd-handle:focus-visible .split-badge,.hd-handle.dragging .split-badge{opacity:1}
+.hd-handle .split-badge{top:auto;bottom:-6.5mm}
+.doc-page.no-heads .band-table .subhead{display:none}
+.sp-tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid #e3e8ef}
+.sp-tools button{height:30px;padding:0 10px;border:1px solid #cad3dd;border-radius:7px;background:#fff;color:#243450;font:600 12.5px system-ui,sans-serif;cursor:pointer}
+.sp-tools button:hover{border-color:#9fb6d6;background:#edf3fb}
+.sp-foot{display:flex;justify-content:flex-end;margin-top:12px}
+.sp-done{height:32px;padding:0 16px;border:0;border-radius:7px;background:var(--navy);color:#fff;font:650 13px system-ui,sans-serif;cursor:pointer}
+.sp-done:hover{background:#22345a}
+.sp-x:focus-visible,.sp-done:focus-visible,.sp-tools button:focus-visible,.row-del:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+@media print{
+  .col-handle,.hd-handle,.head-gear,.heads-show,.embed-layer,.embed-empty,.embed-frame,.embed-bar,.tbl-tools,.row-del,.sec-gear,.sec-pop,.copy-pop{display:none!important}
+  .embed-print{display:block;margin-bottom:1.2mm;padding:1.5mm 2mm;border:0.25mm solid var(--line);border-radius:1mm;font-size:9pt;line-height:1.35}
+  .embed-print b{display:block}
+  .embed-print span{color:#2a3140;word-break:break-all}
+}
+
+/* Block buttons (shown in the margin, not printed) */
+.ctrl{position:absolute;top:-0.5mm;left:100%;padding-left:3mm;display:flex;flex-direction:column;gap:1.2mm;opacity:0;pointer-events:none;transition:opacity .12s}
+.blk:hover>.ctrl,.blk.active>.ctrl,.blk.embed-hover>.ctrl{opacity:1;pointer-events:auto}
+.ctrl button{width:8mm;height:8mm;padding:0;display:grid;place-items:center;border:1px solid #cad3dd;border-radius:1.8mm;background:#fff;color:#243450;cursor:pointer;box-shadow:0 1px 2px rgba(20,30,50,.1);font:700 8.5px/1 system-ui,sans-serif}
+.ctrl button:hover{border-color:#9fb6d6;background:#edf3fb}
+.ctrl button svg{width:4.3mm;height:4.3mm}
+.ctrl button.armed,.ctrl button.armed:hover{border-color:#b3261e;background:#b3261e;color:#fff}
+.ctrl button[data-act="dup"]{position:relative;overflow:hidden;-webkit-touch-callout:none;user-select:none;touch-action:manipulation}
+.ctrl button[data-act="dup"]::after{content:"";position:absolute;left:0;bottom:0;width:0;height:0.7mm;background:var(--accent)}
+.ctrl button[data-act="dup"].holding::after{width:100%;transition:width .55s linear}
+.copy-pop{position:absolute;z-index:45;width:240px;padding:10px 12px 12px;border:1px solid #cdd5df;border-radius:10px;background:#fff;color:var(--ink);font:400 13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-shadow:0 12px 30px rgba(20,30,50,.24)}
+.copy-pop[hidden]{display:none}
+.cp-head{margin-bottom:8px;font-weight:650;color:var(--navy)}
+.cp-chips{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.cp-chips button{height:30px;padding:0;border:1px solid #cad3dd;border-radius:7px;background:#fff;color:#243450;font:600 13px system-ui,sans-serif;cursor:pointer}
+.cp-chips button:hover{border-color:#9fb6d6;background:#edf3fb}
+.cp-row{display:flex;gap:6px;margin-top:8px}
+.cp-row input{width:64px;height:30px;padding:0 8px;border:1px solid #b9c4d1;border-radius:7px;font:inherit}
+.cp-row input:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.cp-go{flex:1;height:30px;border:0;border-radius:7px;background:var(--navy);color:#fff;font:600 13px system-ui,sans-serif;cursor:pointer}
+.cp-go:hover{background:#22345a}
+.cp-chips button:focus-visible,.cp-go:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cp-note{margin:8px 0 0;color:#56657a;font-size:12px}
+@media screen{.blk.active::before{content:"";position:absolute;inset:-1.6mm;border:0.3mm dashed #7fa3dd;border-radius:1.6mm;pointer-events:none}}
+
+.hint{width:var(--cw);text-align:center;color:#9aa6b5;font:400 9.5pt/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;user-select:none}
+.hint p{margin:0}
+.doc-content.empty{display:flex;flex-direction:column}
+.doc-content.empty>.hint{margin:auto 0}
+.doc-content.empty>.result-wrap{margin-top:auto}
+.pages.dragging .doc-content{outline:0.5mm dashed var(--accent);outline-offset:1.5mm}
+@media screen{.doc-page.target .doc-content{outline:0.3mm dashed #7fa3dd;outline-offset:1.5mm;border-radius:1mm}}
+.doc-page.result-only .band-table{display:none}
+.doc-page.result-only .doc-content{margin-top:4mm}
+
+/* Pages menu (sticks to the top of the documentation pages) */
+.doc-section{position:relative;flex:none;width:210mm}
+.pm-rail{position:absolute;top:0;bottom:0;left:calc(100% + 14px);z-index:30;pointer-events:none}
+.page-menu{position:sticky;top:calc((var(--tb-h,52px) + 12px) / var(--doc-zoom,1));pointer-events:auto}
+.pm-anchor{position:relative;font:500 13.5px/1.25 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.pm-toggle{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 11px 0 12px;border:1px solid #b8c3d0;border-radius:8px;background:#fff;color:var(--navy);font-weight:650;white-space:nowrap;cursor:pointer;box-shadow:0 2px 8px rgba(20,30,50,.12)}
+.pm-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.pm-toggle svg{width:16px;height:16px}
+.pm-toggle .chev{width:14px;height:14px;transition:transform .15s}
+.pm-toggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.pm-toggle:focus-visible,.pm-item:focus-visible,.page-ctl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pm-items{position:absolute;top:calc(100% + 6px);right:0;width:310px;padding:6px;border:1px solid #cdd5df;border-radius:10px;background:#fff;box-shadow:0 12px 30px rgba(20,30,50,.22)}
+.pm-items[hidden]{display:none}
+.pm-sep{height:1px;margin:4px 8px;background:#e3e8ef}
+.dd-group{margin:8px 10px 2px;color:#6b7a8f;font:700 11px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.dd-group:first-child{margin-top:4px}
+.pm-item{display:flex;align-items:flex-start;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:7px;background:transparent;color:var(--ink);text-align:left;cursor:pointer}
+.pm-item:hover{background:#eef3fa}
+.pm-item>svg{flex:none;width:18px;height:18px;margin-top:1px;color:var(--navy)}
+.pm-item b{display:block;font-weight:650;color:var(--navy)}
+.pm-item small{display:block;margin-top:2px;font-size:12px;line-height:1.35;color:#56657a}
+.pm-item .check{align-self:center;margin:0 0 0 auto;color:var(--accent);visibility:hidden}
+.pm-item[aria-checked="true"] .check{visibility:visible}
+@media (max-width:1080px){.pm-rail{left:auto;right:12px;top:8px}}
+
+/* Margin button for added pages */
+.page-ctl{position:absolute;top:40mm;right:3.5mm;width:8mm;height:8mm;padding:0;display:grid;place-items:center;border:1px solid #cad3dd;border-radius:1.8mm;background:#fff;color:#243450;cursor:pointer;box-shadow:0 1px 2px rgba(20,30,50,.1)}
+.page-ctl:hover{border-color:#9fb6d6;background:#edf3fb}
+.page-ctl[data-page-act="unbreak"]:hover{border-color:#b3261e;background:#fdf1f0;color:#b3261e}
+.page-ctl svg{width:4.6mm;height:4.6mm}
+
+.toast{position:fixed;left:50%;bottom:22px;z-index:60;max-width:min(92vw,560px);padding:10px 16px;border-radius:9px;background:var(--navy);color:#fff;font:500 13.5px/1.35 system-ui,sans-serif;box-shadow:0 8px 24px rgba(10,20,40,.3);opacity:0;transform:translate(-50%,12px);pointer-events:none;transition:opacity .18s,transform .18s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- Password screen ---------- */
+body.locked{overflow:hidden}
+body.locked .toolbar,body.locked .pages{visibility:hidden}
+.gate{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:20px;background:var(--desk);color:var(--ink);font:400 14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body.locked .gate{display:grid}
+.gate-card{width:min(100%,360px);padding:28px 28px 24px;border-radius:12px;background:#fff;text-align:center;box-shadow:0 1px 2px rgba(20,30,50,.18),0 12px 32px rgba(20,30,50,.18)}
+.gate-icon{display:block;width:44px;height:44px;margin:0 auto 12px;fill:none;stroke:var(--navy);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.gate h1{margin:0;font-size:18px;font-weight:650;color:var(--navy)}
+.gate-sub{margin:4px 0 18px;color:#4a586b}
+.gate label{display:block;margin-bottom:6px;text-align:left;font-weight:600}
+.gate input{width:100%;height:40px;padding:0 12px;border:1px solid #b9c4d1;border-radius:8px;font:inherit;font-size:15px}
+.gate input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.gate input[aria-invalid="true"]{border-color:#b3261e}
+.gate-err{margin:8px 0 0;text-align:left;color:#b3261e;font-weight:500}
+.gate button{width:100%;height:40px;margin-top:16px;border:0;border-radius:8px;background:var(--navy);color:#fff;font-weight:650;cursor:pointer}
+.gate button:hover{background:#22345a}
+.gate button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:0}
+@media print{#docPages,.measure-wrap{zoom:1!important}}
+@media print{
+  body{background:#fff}
+  .gate,.toolbar,.toast,.ctrl,.hint,.slot.empty,.slot-rm,.page-menu,.pm-rail,.page-ctl{display:none!important}
+  .doc-section{width:auto}
+  .pages,#docPages{display:block;padding:0}
+  .page{margin:0;box-shadow:none;break-after:page;page-break-after:always}
+  .part{display:block}
+  #docPages .part:last-child .page:last-of-type{break-after:auto;page-break-after:auto}
+  .ta{display:none}
+  .mirror{display:block}
+}
+</style>
+</head>
+<body class="locked">
+
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+  <div class="gate-card">
+    <svg class="gate-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11.5l2 2 4-4M9 17h6"/></svg>
+    <h1 id="gateTitle">EnglishForm</h1>
+    <p class="gate-sub">Enter the password to open the form.</p>
+    <label for="gatePass">Password</label>
+    <input id="gatePass" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false">
+    <p class="gate-err" id="gateErr" role="alert" hidden>Wrong password. Try again.</p>
+    <button type="button" id="gateBtn">Open form</button>
+  </div>
+</div>
+
+<header class="toolbar">
+  <div class="tb-title">EnglishForm<small>Inspection report</small></div>
+  <div class="tb-group" role="group" aria-label="Add to the documentation">
+    <span class="tb-label">Add</span>
+    <button type="button" class="tb-btn" data-add="text"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5V4.5h14v2M12 4.5v15M9 19.5h6"/></svg>Text</button>
+    <button type="button" class="tb-btn" data-add="image"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 4 3.5 2.5-2 4.5 3.5"/></svg>Image</button>
+    <div class="tb-dd">
+      <button type="button" class="tb-btn" id="colsToggle" aria-haspopup="menu" aria-expanded="false" aria-controls="colsMenu"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="7" height="14" rx="1.5"/><rect x="13.5" y="5" width="7" height="14" rx="1.5"/></svg>Two columns<svg class="i chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" id="colsMenu" role="menu" aria-label="Add a two-column row" hidden>
+        <button type="button" class="pm-item" role="menuitem" data-cols="sketch"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="7" height="14" rx="1.5"/><rect x="13.5" y="5" width="7" height="14" rx="1.5"/></svg><span><b>Sketch + image</b><small>A sketch or photo on each side, with text below.</small></span></button>
+        <button type="button" class="pm-item" role="menuitem" data-cols="imgtext"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="9.5" height="12" rx="1.5"/><path d="M3.5 16l3-3 2 2 1.5-1.5 2.5 2.5M15.5 8H21M15.5 12H21M15.5 16H19"/></svg><span><b>Image + text</b><small>An image on the left, a description on the right.</small></span></button>
+        <button type="button" class="pm-item" role="menuitem" data-cols="embed"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="9.5" height="12" rx="1.5"/><path d="M6.5 9.5v5l4-2.5z"/><path d="M15.5 8H21M15.5 12H21M15.5 16H19"/></svg><span><b>Web content + text</b><small>A video, map or web page with text. Prints as a link.</small></span></button>
+        <button type="button" class="pm-item" role="menuitem" data-cols="table"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="9.5" height="12" rx="1"/><path d="M3 10h9.5M3 14h9.5M7.8 6v12M15.5 8H21M15.5 12H21M15.5 16H19"/></svg><span><b>Measurement table + text</b><small>An editable table with text. Paste cells from a spreadsheet.</small></span></button>
+      </div>
+    </div>
+    <div class="tb-dd">
+      <button type="button" class="tb-btn" id="tblToggle" aria-haspopup="menu" aria-expanded="false" aria-controls="tblMenu"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 3.5 8 12 12.5 20.5 8z"/><path d="M3.5 12 12 16.5 20.5 12M3.5 16 12 20.5 20.5 16"/></svg>Sections<svg class="i chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" id="tblMenu" role="menu" aria-label="Add a section" hidden>
+        <div class="dd-group" role="presentation">Tables</div>
+        <button type="button" class="pm-item" role="menuitem" data-sec="info"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M3.5 9.5h17M3.5 14.5h17M9 4.5v15"/></svg><span><b>Information table</b><small>Label and value pairs, like General information.</small></span></button>
+        <button type="button" class="pm-item" role="menuitem" data-sec="check"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5l1.5 1.5L8.5 5M4 12.5l1.5 1.5 3-3M4 18.5l1.5 1.5 3-3M11.5 7H20M11.5 13H20M11.5 19H20"/></svg><span><b>Checklist</b><small>Numbered items with OK and deviation boxes, like Control points.</small></span></button>
+        <button type="button" class="pm-item" role="menuitem" data-sec="data"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M3.5 9h17M9.2 4.5v15M14.8 4.5v15"/></svg><span><b>Data table</b><small>Your own columns and rows. Paste cells from a spreadsheet.</small></span></button>
+        <div class="dd-group" role="presentation">Pages</div>
+        <button type="button" class="pm-item" role="menuitem" data-pages><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="3.5" width="15" height="17" rx="1.5"/><path d="M4.5 8h15M12 8v3.5M4.5 11.5h15"/></svg><span><b>Inspection area / photo / sketch</b><small>Starts new pages with the photo/sketch band and their own Pages menu.</small></span></button>
+        <button type="button" class="pm-item" role="menuitem" data-headrow><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="7.5" width="17" height="7" rx="1.5"/><path d="M10.5 7.5v7M3.5 18.5h17M3.5 4h11"/></svg><span><b>Heading row</b><small>Column headings for the content that follows. Repeats at the top of the next page.</small></span></button>
+        <p class="dd-note">Click a table’s title bar to rename it, add rows and set its page logic.</p>
+      </div>
+    </div>
+  </div>
+  <div class="tb-spacer"></div>
+  <div class="tb-group">
+    <button type="button" class="tb-btn" id="btnOpen"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5A1.5 1.5 0 0 1 5 5h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z"/></svg>Open<span class="tb-long"> draft</span></button>
+    <button type="button" class="tb-btn" id="btnSave"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>Save<span class="tb-long"> draft</span></button>
+    <button type="button" class="tb-btn" id="btnClear"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4"/></svg><span>Clear form</span></button>
+    <button type="button" class="tb-btn tb-switch" id="btnPageNo" role="switch" aria-checked="true" title="Show page numbers at the bottom right of every page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 4 7.5 20M16.5 4l-2 16M4.5 9h15.5M3.5 15h15.5"/></svg>Page numbers<span class="sw" aria-hidden="true"></span></button>
+    <button type="button" class="tb-btn primary" id="btnPrint"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1.5 1.5 0 0 1-1.5-1.5v-5A1.5 1.5 0 0 1 5 9h14a1.5 1.5 0 0 1 1.5 1.5v5A1.5 1.5 0 0 1 19 17h-2M7 14h10v6H7z"/></svg>Print / PDF</button>
+  </div>
+</header>
+
+<main class="pages" id="pages">
+
+  <!-- ============ All report pages are built automatically ============ -->
+  <div id="docPages" aria-label="Inspection report">
+  </div>
+</main>
+
+<div hidden id="meta">
+  <span data-field="report_title" data-sync="title" data-keep>LIFTING EQUIPMENT INSPECTION</span>
+  <span data-field="footer_text" data-sync="footer" data-keep>Lumen Ridge Inspection Ltd | Inspection Services | Inspection • Control • Documentation</span>
+</div>
+
+<!-- Template for the report pages (page 1 and any continuation) -->
+<template id="tplReportPage">
+  <section class="page doc-page report-page">
+    <header class="page-head">
+      <div class="titles"><div class="t1"><span class="f" data-sync="title" data-hint="INSPECTION TYPE"></span></div><div class="t2">Inspection Report</div></div>
+    </header>
+    <div class="doc-content"></div>
+    <footer class="page-foot"><span class="f foot-text" data-sync="footer" data-hint="Company name | Services"></span><span class="page-no"></span></footer>
+  </section>
+</template>
+
+<!-- Template for every documentation page (the header repeats on each page) -->
+<template id="tplDocPage">
+  <section class="page doc-page">
+    <header class="page-head">
+      <div class="titles"><div class="t1"><span class="f" data-sync="title" data-hint="INSPECTION TYPE"></span></div><div class="t2">Findings, documentation and conclusion</div></div>
+    </header>
+    <table class="grid band-table">
+      <colgroup><col style="width:72mm"><col style="width:108mm"></colgroup>
+      <tr><th colspan="2" class="band sec-band" tabindex="0" role="button" aria-haspopup="dialog" title="Page section settings"><span class="sec-title">INSPECTION AREA / PHOTO / SKETCH</span><span class="sec-gear"></span></th></tr>
+      <tr class="subhead"><th>Sketch / measuring points</th><th>Photo / documentation</th></tr>
+    </table>
+    <div class="doc-content"></div>
+    <footer class="page-foot"><span class="f foot-text" data-sync="footer" data-hint="Company name | Services"></span><span class="page-no"></span></footer>
+  </section>
+</template>
+
+<div hidden id="holder">
+  <!-- ================= RESULT / CONCLUSION (never split across pages) ================= -->
+  <div class="result-wrap" id="resultBlock">
+    <table class="grid result">
+      <colgroup><col style="width:30mm"><col style="width:34mm"><col style="width:50mm"><col style="width:15mm"><col style="width:15mm"><col style="width:36mm"></colgroup>
+      <tr><th colspan="6" class="band sec-band" tabindex="0" role="button" aria-haspopup="dialog" title="Table settings: rename and set page logic"><span class="sec-title">RESULT / CONCLUSION</span><span class="sec-gear"></span></th></tr>
+      <tr>
+        <th>Result</th>
+        <td><div class="f" data-field="res_result" data-hint="e.g. Approved">Approved</div></td>
+        <th class="lbl-check">Deviation registered<button class="cb" data-check="res_deviation" aria-checked="false" aria-label="Deviation registered"></button></th>
+        <th colspan="3" class="lbl-check">Client approval:<button class="cb" data-check="res_client_approval" aria-checked="false" aria-label="Client approval"></button></th>
+      </tr>
+      <tr>
+        <th>Certificate no.:</th>
+        <td colspan="5"><div class="f" data-field="res_certificate" data-hint="Inspector certificate no.">INS-2291 Level 2</div></td>
+      </tr>
+      <tr class="r-comment"><th>Comment / action:</th><td colspan="5"><div class="f" data-field="res_comment" data-hint="Comments or required actions"></div></td></tr>
+      <tr><th>Scope of inspection:</th><td colspan="5"><div class="f" data-field="res_scope" data-hint="What was inspected">Runway beams, end carriages, hoist and hook block</div></td></tr>
+      <tr><th>Reference / attachments:</th><td colspan="5"><div class="f" data-field="res_reference" data-hint="Attached documents, photos, etc."></div></td></tr>
+      <tr class="r-sign"><th>Inspector / signature:</th><td colspan="3"><div class="f" data-field="res_signature" data-hint="Signature"></div></td><th>Date:</th><td><div class="f" data-field="res_date" data-hint="Date"></div></td></tr>
+    </table>
+  </div>
+</div>
+
+<input type="file" id="fileImg" accept="image/*" hidden>
+<input type="file" id="fileJson" accept=".json,application/json" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+const MM = 96 / 25.4;
+const CW = 180;                        // content width (mm)
+const SPLIT = 72;                      // default first column in the page header (mm) = 40 %
+const VARIANTS = {                     // two-column row types: what each column holds
+  sketch:  { kinds: ['media', 'media'], split: SPLIT / CW },
+  imgtext: { kinds: ['image', 'text'],  split: 0.5 },
+  embed:   { kinds: ['embed', 'text'],  split: 0.6 },
+  table:   { kinds: ['table', 'text'],  split: 0.6 }
+};
+const SPLIT_MIN = 0.2, SPLIT_MAX = 0.8, SNAP_TOL = 0.015;
+const rowSnaps = row => {                // 50 % and the first line of the heading row in effect above the row
+  const part = row.closest('.part'), sec = (row.dataset.head && byId(row.dataset.head)) || (part && byId(part.dataset.part));
+  return [sec && sec.cols && sec.cols.length > 1 ? sec.cols[0].w : SPLIT / CW, 0.5];
+};
+const variantOf = b => VARIANTS[b.variant] || VARIANTS.sketch;
+const clampSplit = v => Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, Number.isFinite(v) ? v : SPLIT / CW));
+const cellW = (b, ci) => { const left = clampSplit(b.split) * CW; return ci ? CW - left - 3.25 : left - 3; };
+const MAX_IMG_H = 165;                 // max image height, full width (mm)
+const MAX_CELL_H = 105;                // max image height in two-column rows (mm)
+const MIN_FRAG = 11 * MM;              // smallest text fragment at the bottom of a page
+const MAX_PX = 2000;                   // large images are scaled down on import
+const SIZES = [100, 75, 50];
+const FORMAT = 'englishform-report';
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+let docZoom = 1;                       // page area scale on narrow screens (1 on desktop)
+const state = { blocks: [], result: { title: 'RESULT / CONCLUSION', place: 'flow' } };
+const resultOwnPage = () => ['newpage', 'alone', 'bottomalone'].includes(state.result.place);
+const nodes = new Map();
+let armed = { id: null, until: 0 };
+let activeSeg = null;   // selected page (segment) for new content
+let activeId = null, paginating = false, dirty = false, timer = 0, seq = 0, lastEditedPage = null, pickTarget = null;
+
+const docRoot = $('#docPages');
+const pagesEl = $('#pages');
+const tplPage = $('#tplDocPage'), tplReport = $('#tplReportPage');
+const resultEl = $('#resultBlock');
+const fileImg = $('#fileImg'), fileJson = $('#fileJson');
+
+/* ---------- Password ---------- */
+const PASSWORD_ON = false;              // true = ask for the password, false = open the form directly
+const PASSCODE = ' ';
+const gatePass = $('#gatePass'), gateErr = $('#gateErr');
+const appParts = [$('.toolbar'), $('#pages')];
+const isLocked = () => document.body.classList.contains('locked');
+appParts.forEach(el => { el.inert = true; });
+function tryUnlock() {
+  if (gatePass.value.trim() === PASSCODE) {
+    document.body.classList.remove('locked');
+    appParts.forEach(el => { el.inert = false; });
+    $('#gate').remove();
+    paginate();
+    return;
+  }
+  gateErr.hidden = false;
+  gatePass.setAttribute('aria-invalid', 'true');
+  gatePass.select();
+}
+$('#gateBtn').addEventListener('click', tryUnlock);
+gatePass.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+gatePass.addEventListener('input', () => { gateErr.hidden = true; gatePass.removeAttribute('aria-invalid'); });
+if (PASSWORD_ON) gatePass.focus();
+else { document.body.classList.remove('locked'); appParts.forEach(el => { el.inert = false; }); $('#gate').remove(); }
+
+const ICON = {
+  up: '<path d="M12 19V5M6 11l6-6 6 6"/>',
+  down: '<path d="M12 5v14M6 13l6 6 6-6"/>',
+  del: '<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/>',
+  copy: '<rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2"/><path d="M15.5 8.5V6A1.5 1.5 0 0 0 14 4.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/>',
+  x: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  pageMinus: '<path d="M6 3.5h8l4 4v13H6z"/><path d="M9.5 14h5"/>',
+  toTop: '<path d="M12 20V9M7.5 13.5 12 9l4.5 4.5M5 4.5h14"/>'
+};
+const svg = p => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+const h = (tag, cls, props) => { const e = document.createElement(tag); if (cls) e.className = cls; if (props) Object.assign(e, props); return e; };
+const newId = () => 'b' + Date.now().toString(36) + (seq++).toString(36);
+const byId = id => state.blocks.find(b => b.id === id);
+const indexOf = id => state.blocks.findIndex(b => b.id === id);
+const smooth = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+
+/* ---------- Fields and checkboxes ---------- */
+function makeEditable(el) {
+  try { el.contentEditable = 'plaintext-only'; } catch (_) { /* older browsers */ }
+  if (el.contentEditable !== 'plaintext-only') el.contentEditable = 'true';
+  el.spellcheck = false;
+}
+$$('[data-field]').forEach(makeEditable);
+
+// grey hint text in empty fields (screen only)
+function markEmpty(el) {
+  if (el.textContent === '' && el.firstChild) el.replaceChildren();
+  el.classList.toggle('is-empty', el.textContent === '');
+}
+// report title and footer are shown on every page; editing one updates all
+const syncValue = key => { const src = document.querySelector(`#meta [data-sync="${key}"]`); return src ? src.textContent : ''; };
+document.addEventListener('input', e => {
+  const t = e.target instanceof Element ? e.target.closest('.f') : null;
+  if (!t) return;
+  markEmpty(t);
+  if (!t.dataset.sync) return;
+  $$(`[data-sync="${t.dataset.sync}"]`).forEach(el => { if (el !== t) { el.textContent = t.textContent; markEmpty(el); } });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target instanceof Element && e.target.closest('[data-sync]')) e.preventDefault();
+});
+$$('.cb').forEach(cb => {
+  cb.type = 'button';
+  cb.setAttribute('role', 'checkbox');
+  cb.innerHTML = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.6 1.6l6.8 6.8M8.4 1.6l-6.8 6.8"/></svg>';
+});
+const toggle = cb => {
+  cb.setAttribute('aria-checked', cb.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
+  if (cb.dataset.k) syncSecCheck(cb);
+};
+
+function caretOffset(el) {
+  const sel = getSelection();
+  if (!sel.rangeCount || !el.contains(sel.focusNode)) return 0;
+  const r = document.createRange();
+  r.selectNodeContents(el);
+  r.setEnd(sel.focusNode, sel.focusOffset);
+  let count = 0;                                  // line-break elements count as one character, like "\n"
+  const walk = document.createTreeWalker(r.cloneContents(), NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  for (let x = walk.nextNode(); x; x = walk.nextNode()) count += x.nodeType === 3 ? x.length : x.nodeName === 'BR' ? 1 : 0;
+  return count;
+}
+function setCaret(el, off) {
+  const sel = getSelection(), r = document.createRange();
+  const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  let left = off;
+  for (let x = walk.nextNode(); x; x = walk.nextNode()) {
+    if (x.nodeType === 3) {
+      if (left <= x.length) { r.setStart(x, left); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); return; }
+      left -= x.length;
+    } else if (x.nodeName === 'BR') {
+      if (left === 0) { r.setStartBefore(x); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); return; }
+      left -= 1;
+    }
+  }
+  r.selectNodeContents(el); r.collapse(false); sel.removeAllRanges(); sel.addRange(r);
+}
+
+/* ---------- Text fields in the documentation ---------- */
+function autosize(ta) { ta.style.height = '0px'; ta.style.height = ta.scrollHeight + 'px'; }
+function makeTA(value, placeholder, cls) {
+  const ta = h('textarea', 'ta' + (cls ? ' ' + cls : ''), { rows: 1, placeholder, value: value || '' });
+  const mirror = h('div', 'mirror' + (cls ? ' ' + cls : ''));   // used when printing
+  mirror.textContent = ta.value;
+  return [ta, mirror];
+}
+function setTA(ta, v) { ta.value = v; ta.nextElementSibling.textContent = v; autosize(ta); }
+
+function fitBox(w, hgt, maxW, maxH) {
+  if (!w || !hgt) { w = 4; hgt = 3; }
+  let bw = maxW, bh = bw * hgt / w;
+  if (bh > maxH) { bh = maxH; bw = bh * w / hgt; }
+  return [bw, bh];
+}
+function sizeImg(img, wrap, w, hgt, maxW, maxH) {
+  const [bw, bh] = fitBox(w, hgt, maxW, maxH);
+  img.style.width = bw + 'mm'; img.style.height = bh + 'mm';
+  if (wrap) wrap.style.width = bw + 'mm';
+}
+
+/* ---------- Blocks ---------- */
+function controls(b) {
+  const c = h('div', 'ctrl');
+  const btn = (act, title, inner) => `<button type="button" data-act="${act}" title="${title}" aria-label="${title}">${inner}</button>`;
+  const isArmed = armed.id === b.id && Date.now() < armed.until;
+  c.innerHTML = btn('up', 'Move up', svg(ICON.up)) + btn('down', 'Move down', svg(ICON.down)) +
+    (b.type === 'image' ? btn('size', 'Change image size', `<span class="size-lbl">${b.size}%</span>`) : '') +
+    (b.type === 'pair' ? btn('dup', 'Duplicate below. Hold, right-click or Shift+click for several copies.', svg(ICON.copy)) : '') +
+    btn('del', isArmed ? 'Click again to delete' : 'Delete block', svg(ICON.del));
+  if (isArmed) c.lastElementChild.classList.add('armed');
+  return c;
+}
+function textFrag(b, start, text) {
+  const n = h('div', 'blk blk-text');
+  n.dataset.id = b.id;
+  const [ta, m] = makeTA(text, 'Write text …');
+  ta.dataset.block = b.id;
+  ta.dataset.start = String(start);
+  n.append(ta, m, controls(b));
+  return n;
+}
+function imageNode(b) {
+  const n = h('div', 'blk blk-image');
+  n.dataset.id = b.id;
+  const fig = h('div', 'fig');
+  const img = h('img', 'im', { src: b.src, alt: '' });
+  const [ta, m] = makeTA(b.caption, 'Image caption (optional)', 'cap');
+  fig.append(img, ta, m);
+  n.append(fig, controls(b));
+  sizeImg(img, fig, b.w, b.h, CW * b.size / 100, MAX_IMG_H);
+  return n;
+}
+function fillSlot(slot, cell, ci, b) {
+  slot.replaceChildren();
+  slot.classList.toggle('empty', !cell.src);
+  if (cell.src) {
+    const wrap = h('div', 'imwrap');
+    const img = h('img', 'im', { src: cell.src, alt: '', title: 'Click to replace image' });
+    img.dataset.act = 'pick';
+    const rm = h('button', 'slot-rm', { type: 'button', title: 'Remove image', innerHTML: svg(ICON.x) });
+    rm.setAttribute('aria-label', 'Remove image');
+    rm.dataset.act = 'unset';
+    wrap.append(img, rm);
+    slot.append(wrap);
+    sizeImg(img, wrap, cell.w, cell.h, cellW(b, ci), MAX_CELL_H);
+  } else {
+    const add = h('button', 'slot-add', { type: 'button', innerHTML: svg(ICON.plus) + (ci === 0 && variantOf(b).kinds[0] === 'media' ? 'Add sketch' : 'Add image') });
+    add.dataset.act = 'pick';
+    slot.append(add);
+  }
+}
+function pairNode(b) {
+  const v = variantOf(b);
+  const n = h('div', 'blk blk-pair');
+  n.dataset.id = b.id;
+  n.dataset.variant = VARIANTS[b.variant] ? b.variant : 'sketch';
+  b.cells.forEach((cell, ci) => {
+    const c = h('div', 'cell'), kind = v.kinds[ci];
+    c.dataset.ci = String(ci);
+    n.append(c);
+    if (kind === 'media' || kind === 'image') { const slot = h('div', 'slot'); c.append(slot); fillSlot(slot, cell, ci, b); }
+    if (kind === 'embed') { const el = h('div', 'embed'); c.append(el); fillEmbed(el, b, ci); }
+    if (kind === 'table') { const el = h('div', 'mtable-wrap'); c.append(el); fillTable(el, b, ci); }
+    if (kind === 'media' || kind === 'text') {
+      const ph = kind === 'media' ? (ci ? 'Description …' : 'Description / measuring points …') : 'Description …';
+      const [ta, m] = makeTA(cell.text, ph);
+      ta.dataset.cell = String(ci);
+      c.append(ta, m);
+    }
+  });
+  const hdl = h('div', 'col-handle', { tabIndex: 0, title: 'Drag to change the column widths. Double-click to reset.' });
+  hdl.setAttribute('role', 'separator');
+  hdl.setAttribute('aria-orientation', 'vertical');
+  hdl.setAttribute('aria-label', 'Column divider');
+  hdl.setAttribute('aria-valuemin', String(SPLIT_MIN * 100));
+  hdl.setAttribute('aria-valuemax', String(SPLIT_MAX * 100));
+  hdl.append(h('span', 'split-badge'));
+  n.append(hdl, controls(b));
+  applySplit(n, b);
+  return n;
+}
+function nodeFor(b) {
+  let n = nodes.get(b.id);
+  if (!n) { n = b.type === 'image' ? imageNode(b) : pairNode(b); nodes.set(b.id, n); }
+  const on = armed.id === b.id && Date.now() < armed.until, del = n.querySelector('[data-act="del"]');
+  const t = on ? 'Click again to delete' : 'Delete block';
+  del.classList.toggle('armed', on); del.title = t; del.setAttribute('aria-label', t);
+  return n;
+}
+
+/* ---------- Pagination ---------- */
+function newPage(tpl = tplPage, parent = docRoot) {
+  const page = tpl.content.firstElementChild.cloneNode(true);
+  $$('[data-sync]', page).forEach(el => { el.textContent = syncValue(el.dataset.sync); makeEditable(el); markEmpty(el); });
+  $$('.sec-gear:empty', page).forEach(g => { g.innerHTML = svg(ICON.gear); });
+  parent.append(page);
+  return page.querySelector('.doc-content');
+}
+const lastPage = () => { const all = docRoot.querySelectorAll('.page'); return all[all.length - 1]; };
+const fits = (content, el) => el.getBoundingClientRect().bottom <= content.getBoundingClientRect().bottom + 0.5;
+
+function findCut(content, el, ta, rest) {
+  const cands = [];
+  for (let i = 1; i < rest.length; i++) if (/\s/.test(rest[i - 1]) && !/\s/.test(rest[i])) cands.push(i);
+  let lo = 0, hi = cands.length - 1, best = 0;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    setTA(ta, rest.slice(0, cands[mid]));
+    if (fits(content, el)) { best = cands[mid]; lo = mid + 1; } else hi = mid - 1;
+  }
+  return best;
+}
+
+function paginate() {
+  if (paginating) return;
+  paginating = true;
+  clearTimeout(timer);
+  dirty = false;
+  const focus = captureFocus();
+  secOverride = focus && focus.kind === 'sec' && focus.k ? { id: focus.id, k: focus.k, raw: focus.raw } : null;   // rebuild the cell being typed in exactly as it is
+  const sx = window.scrollX, sy = window.scrollY;
+  docRoot.style.minHeight = docRoot.offsetHeight + 'px';
+  docRoot.replaceChildren();
+
+  let seg = 'report', part = 'report', content, partEl = null, curStart = null, curHead = null, pendingPart = null, firstPending = false;
+  const newPart = (kind, id) => { partEl = h('div', 'part'); partEl.dataset.kind = kind; partEl.dataset.part = id; docRoot.append(partEl); };
+  const open = kind => {                     // report = first part, manual = segment start, flow = automatic, result = result on its own page
+    if (pendingPart && kind !== 'report') { newPart('doc', pendingPart); pendingPart = null; }   // first own page of a section that started mid-page
+    content = newPage(kind === 'report' ? tplReport : tplPage, partEl);
+    if (kind !== 'report' && curStart) {
+      applyPagesHeader(content.parentElement, curStart, curHead);
+      content.parentElement.classList.toggle('no-title', !firstPending && curStart.titleAll === false);   // title bar on the first page only
+    }
+    firstPending = false;
+    content.parentElement.dataset.seg = seg;
+    content.parentElement.dataset.kind = kind;
+  };
+  const next = (carryHead = true) => {       // a heading row never stays alone at the bottom of a page: it moves on with what follows
+    const last = content.lastElementChild, carry = carryHead && last && last.classList.contains('blk-head') && !last.classList.contains('at-bottom') && content.childElementCount > 1 ? last : null;
+    if (carry) carry.remove();
+    open(part === 'report' ? 'report' : 'flow');
+    if (carry) content.append(carry);
+  };
+  const anchorBottom = el => { content.classList.add('has-bottom'); el.classList.add('at-bottom'); };
+  const place = el => {
+    content.append(el);
+    $$('textarea', el).forEach(autosize);
+    if (!fits(content, el) && content.childElementCount > 1) { el.remove(); next(); content.append(el); }
+  };
+  const placeText = b => {
+    let start = 0;
+    for (let guard = 0; guard < 500; guard++) {
+      const rest = b.text.slice(start);
+      const el = textFrag(b, start, rest);
+      const ta = el.firstElementChild;
+      content.append(el);
+      autosize(ta);
+      if (fits(content, el)) return;
+      const alone = content.childElementCount === 1;
+      const cut = findCut(content, el, ta, rest);
+      if (cut > 0) {
+        setTA(ta, rest.slice(0, cut));
+        if (alone || ta.offsetHeight >= MIN_FRAG) { start += cut; next(); continue; }
+      }
+      if (alone) { setTA(ta, rest); return; }
+      el.remove();
+      next();
+    }
+  };
+
+  const placeSection = b => {
+    const bottom = b.place === 'bottom' || b.place === 'bottomalone';
+    const solo = b.place === 'alone' || b.place === 'bottomalone', n = secBody(b);
+    if ((solo || b.place === 'newpage') && content.childElementCount) next();
+    const mark = () => { if (solo) content.parentElement.dataset.solo = '1'; };
+    const el = secHeader(b, false), body = el.querySelector('tbody');
+    for (let i = 0; i < n; i++) body.append(secRow(b, i));
+    content.append(el);
+    if (fits(content, el)) { mark(); if (bottom) anchorBottom(el); return; }
+    if ((!b.split || bottom) && content.childElementCount > 1) {      // keep together: try a fresh page
+      el.remove(); next(); content.append(el);
+      if (fits(content, el)) { mark(); if (bottom) anchorBottom(el); return; }
+    }
+    el.remove();                                                         // split row by row, title repeated
+    let i = 0, cont = false;
+    while (i < n) {
+      const frag = secHeader(b, cont), tb = frag.querySelector('tbody');
+      content.append(frag);
+      let j = i;
+      while (j < n) {
+        const tr = secRow(b, j);
+        tb.append(tr);
+        if (!fits(content, frag)) { tr.remove(); break; }
+        j++;
+      }
+      if (j < n && j - i > 1 && b.kind === 'check' && 'g' in b.rows[j - 1]) { tb.lastElementChild.remove(); j--; }   // no group title at the bottom of a page
+      if (j === i) {
+        if (content.childElementCount > 1) { frag.remove(); next(); continue; }
+        tb.append(secRow(b, j)); j++;                                    // a single row taller than a page
+      }
+      mark();
+      i = j; cont = true;
+      if (i < n) next();
+    }
+  };
+
+  const blocks = state.blocks, END_NEW = ['alone', 'bottom', 'bottomalone'];   // whatever follows these groups starts on a new page
+  const groupEnd = (i, types) => { let j = i + 1; while (j < blocks.length && !types.includes(blocks[j].type)) j++; return j; };
+  const leftMm = () => { const cb = content.getBoundingClientRect(), last = content.lastElementChild; return (cb.bottom - (last ? last.getBoundingClientRect().bottom : cb.top)) / (MM * docZoom); };
+  const groups = [];                                                     // open groups (page section, heading row) and where they end
+  let forceNew = false, pendingAnchor = false;
+  const closeGroups = i => { while (groups.length && groups[groups.length - 1].end <= i) if (END_NEW.includes(groups.pop().place)) forceNew = true; };
+
+  newPart('report', 'report');
+  open('report');
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i];
+    closeGroups(i);
+    if (b.type === 'docstart') {                                         // page section = title bar + everything up to the next page section
+      const p = PLACES.includes(b.place) ? b.place : 'newpage', end = groupEnd(i, ['docstart']);
+      groups.push({ end, place: p });
+      let inline = false;
+      if ((p === 'flow' || p === 'bottom') && !forceNew && content.childElementCount)
+        inline = leftMm() >= (p === 'flow' ? sbandMm(b) + 25 : groupMm(i, end, true) + 6);
+      forceNew = false;
+      curStart = b; curHead = null; seg = b.id;
+      if (inline) {                                                      // title bar mid-page; the section's own pages start at the next page
+        const el = sbandNode(b);
+        place(el);
+        if (p === 'bottom') anchorBottom(el);
+        part = 'doc';
+        pendingPart = b.id;
+      } else {
+        if (partEl.dataset.kind === 'report' && !content.childElementCount && partEl.childElementCount === 1) partEl.remove();   // no report tables left
+        part = 'doc'; pendingPart = null;
+        newPart('doc', b.id);
+        firstPending = true;
+        open('manual');
+        const firstPage = content.parentElement;
+        firstPage.dataset.start = 'section';
+        if (p === 'bottom' || p === 'bottomalone') {                    // title bar goes to the bottom together with the section's content
+          firstPage.classList.add('band-inline');
+          if (groupMm(i, end, true) + 2 <= leftMm()) { const el = sbandNode(b); place(el); anchorBottom(el); }
+          else firstPage.classList.remove('band-inline');                // longer than a page: title bar at the top as usual
+        }
+      }
+      continue;
+    }
+    if (b.type === 'headrow') {                                          // heading row group = the row + content up to the next heading row or page section
+      const p = PLACES.includes(b.place) ? b.place : 'flow', end = groupEnd(i, ['headrow', 'docstart']);
+      groups.push({ end, place: p });
+      if (forceNew) { next(false); forceNew = false; }
+      if ((p === 'newpage' || p === 'alone' || p === 'bottomalone') && content.childElementCount) next(false);
+      let anchor = pendingAnchor;
+      pendingAnchor = false;
+      if (p === 'bottom' || p === 'bottomalone') {
+        const need = groupMm(i, end, false) + 6;
+        if (need < Infinity && leftMm() < need && content.childElementCount) next(false);
+        anchor = anchor || need <= leftMm();
+      }
+      const el = headNode(b);
+      place(el);
+      if (anchor && el.parentElement === content) anchorBottom(el);
+      curHead = b;
+      continue;
+    }
+    if (b.type === 'break') { if (part === 'doc') { seg = b.id; open('manual'); } else next(false); forceNew = false; pendingAnchor = false; continue; }
+    if (forceNew) { next(); forceNew = false; }
+    const before = content, mark = content.lastElementChild;
+    if (b.type === 'text') placeText(b);
+    else if (b.type === 'section') { placeSection(b); if (b.place !== 'flow' && b.place !== 'newpage') forceNew = true; }
+    else { const node = nodeFor(b); node.dataset.head = curHead ? curHead.id : curStart ? curStart.id : ''; place(node); }
+    if (pendingAnchor) {                                                 // first content of a bottom-placed page section
+      const first = mark ? mark.nextElementSibling : before.firstElementChild;
+      if (content === before && first) anchorBottom(first);
+      pendingAnchor = false;
+    }
+  }
+  closeGroups(blocks.length);
+  if (resultOwnPage()) { open('result'); forceNew = false; }
+  if (forceNew) next();
+  resultEl.classList.remove('at-bottom');
+  place(resultEl);
+  if (state.result.place === 'bottom' || state.result.place === 'bottomalone') anchorBottom(resultEl);
+  decoratePages();
+  $$('.part[data-kind="doc"]', docRoot).forEach(p => {                    // every page section has its own Pages menu, sticky within that section only
+    const rail = h('div', 'pm-rail');
+    rail.append(pageMenu(p.dataset.part, p.contains(resultEl)));
+    p.append(rail);
+  });
+  docRoot.style.minHeight = '';
+  window.scrollTo(sx, sy);
+  restoreFocus(focus);
+  secOverride = null;
+  paginating = false;
+  if (blkRO) { blkRO.disconnect(); $$('.blk', docRoot).forEach(n => blkRO.observe(n)); }
+  syncEmbeds();
+  positionSecPop();
+  fitScrollRoom();
+}
+
+function captureFocus() {
+  const a = document.activeElement;
+  if (!a || !docRoot.contains(a)) return null;
+  if (a.matches('textarea[data-block]')) {
+    const st = +a.dataset.start;
+    return { kind: 'frag', id: a.dataset.block, s: st + a.selectionStart, e: st + a.selectionEnd };
+  }
+  const sec = a.dataset.k ? a.closest('.blk-sec') : a.classList.contains('sec-band') ? a.closest('.blk-sec') : null;
+  if (sec) return { kind: 'sec', id: sec.dataset.id, k: a.dataset.k || '', off: a.isContentEditable ? caretOffset(a) : 0, raw: a.isContentEditable ? a.innerText : '' };
+  if (a.tagName === 'TEXTAREA') return { kind: 'ta', el: a, s: a.selectionStart, e: a.selectionEnd };
+  if (a.isContentEditable) return { kind: 'ce', el: a, off: caretOffset(a) };
+  return { kind: 'el', el: a };
+}
+function restoreFocus(f) {
+  if (!f) return;
+  let el = f.el, s = f.s, e = f.e;
+  if (f.kind === 'frag') {
+    const frags = $$(`textarea[data-block="${f.id}"]`, docRoot);
+    el = null;
+    for (const t of frags) {
+      const st = +t.dataset.start, end = st + t.value.length;
+      if (f.s <= end) { el = t; s = f.s - st; e = Math.min(f.e, end) - st; break; }
+    }
+    if (!el && frags.length) { el = frags[frags.length - 1]; s = e = el.value.length; }
+  }
+  if (f.kind === 'sec') {                   // table sections are rebuilt on every layout: find the same cell again
+    el = docRoot.querySelector(`.blk-sec[data-id="${f.id}"] ${f.k ? `[data-k="${f.k}"]` : '.sec-band'}`);
+    s = null;
+  }
+  if (!el || !el.isConnected) return;
+  el.focus({ preventScroll: true });
+  if (f.kind === 'ce' || (f.kind === 'sec' && el.isContentEditable)) setCaret(el, f.off);
+  else if (s != null && el.setSelectionRange) { try { el.setSelectionRange(s, Math.max(s, e)); } catch (_) {} }
+  const r = el.getBoundingClientRect();
+  if (r.bottom < 60 || r.top > window.innerHeight) el.scrollIntoView({ block: 'center' });
+}
+function schedule(ms) { clearTimeout(timer); timer = setTimeout(paginate, ms); }
+function keepInView(id) {
+  const n = docRoot.querySelector(`.blk[data-id="${id}"]`);
+  if (!n) return;
+  const r = n.getBoundingClientRect();
+  if (r.top < 70 || r.bottom > window.innerHeight) n.scrollIntoView({ block: 'center', behavior: smooth() });
+}
+
+/* ---------- Editing the documentation ---------- */
+function syncModel(t) {
+  const blk = t.closest('.blk');
+  const b = blk && byId(blk.dataset.id);
+  if (!b) return;
+  if (b.type === 'text') {
+    let s = 0;
+    b.text = $$(`textarea[data-block="${b.id}"]`, docRoot).map(x => { x.dataset.start = String(s); s += x.value.length; return x.value; }).join('');
+  } else if (b.type === 'image') b.caption = t.value;
+  else b.cells[+t.dataset.cell].text = t.value;
+}
+docRoot.addEventListener('input', e => {
+  const t = e.target;
+  if (t.tagName === 'TEXTAREA') { autosize(t); t.nextElementSibling.textContent = t.value; syncModel(t); }
+  else if (t.classList && t.classList.contains('tc')) syncTableCell(t);
+  else if (t.dataset && t.dataset.k && t.closest('.blk-sec')) syncSecCell(t);
+  dirty = true;
+  const content = t.closest('.doc-content');
+  if (!content) return;
+  lastEditedPage = content.parentElement;
+  const last = content.lastElementChild;
+  if (last && !fits(content, last)) schedule(150);          // content overflows: move it on
+});
+docRoot.addEventListener('focusout', () => {
+  if (paginating || !dirty) return;
+  if (!lastEditedPage || lastEditedPage !== lastPage()) schedule(80);  // may pull content back up
+  else dirty = false;
+});
+function markActive() {
+  $$('.blk', docRoot).forEach(n => n.classList.toggle('active', n.dataset.id === activeId));
+  $$('.doc-page', docRoot).forEach(p => p.classList.toggle('target', !activeId && activeSeg !== null && p.dataset.seg === activeSeg));
+}
+function setActive(id) { activeId = id; activeSeg = null; markActive(); }
+function setTarget(seg) { activeId = null; activeSeg = seg; markActive(); }
+docRoot.addEventListener('focusin', e => { const blk = e.target.closest('.blk'); if (blk) setActive(blk.dataset.id); });
+docRoot.addEventListener('pointerdown', e => {
+  if (e.target.closest('.page-ctl')) return;
+  const blk = e.target.closest('.blk');
+  if (blk) { setActive(blk.dataset.id); return; }
+  const pg = e.target.closest('.doc-page');
+  if (pg && !pg.classList.contains('result-only') && !pg.classList.contains('solo') && e.target.closest('.doc-content') && !e.target.closest('#resultBlock')) setTarget(pg.dataset.seg);
+  else setActive(null);
+});
+
+function setArmedLook(id, on) {
+  $$(`.blk[data-id="${id}"] [data-act="del"]`, docRoot).forEach(btn => {
+    const t = on ? 'Click again to delete' : 'Delete block';
+    btn.classList.toggle('armed', on); btn.title = t; btn.setAttribute('aria-label', t);
+  });
+}
+function arm(id, ms = 2500) {
+  armed = { id, until: Date.now() + ms };
+  setArmedLook(id, true);
+  setTimeout(() => { if (armed.id === id && Date.now() >= armed.until) { armed.id = null; setArmedLook(id, false); } }, ms + 20);
+}
+function move(i, j) {
+  const [b] = state.blocks.splice(i, 1);
+  state.blocks.splice(j, 0, b);
+  activeId = b.id;
+  paginate();
+  keepInView(b.id);
+}
+docRoot.addEventListener('click', e => {
+  const pa = e.target.closest('[data-page-act]');
+  if (pa) { removePage(pa); return; }
+  const band = e.target.closest('.sec-band');
+  const showHeads = e.target.closest('[data-heads-show]');
+  if (showHeads) { const sec = byId(secIdOf(showHeads.closest('.sec-band'))); if (sec) { sec.heads = true; paginate(); } return; }
+  if (band) { openSecPop(secIdOf(band), band); return; }
+  const sh = e.target.closest('.subhead');
+  if (sh && !e.target.closest('.hd-handle')) {
+    const src = byId(sh.dataset.headId);
+    if (src && src.type === 'docstart') openSecPop(src.id, sh, 'heads');
+    else if (src) openSecPop(src.id, sh);
+    return;
+  }
+  const btn = e.target.closest('[data-act]');
+  const blk = btn && btn.closest('.blk');
+  const b = blk && byId(blk.dataset.id);
+  if (!b) return;
+  const i = indexOf(b.id);
+  const cellEl = btn.closest('.cell');
+  switch (btn.dataset.act) {
+    case 'up': if (i > 0) move(i, i - 1); break;
+    case 'down': if (i < state.blocks.length - 1) move(i, i + 1); break;
+    case 'size': {
+      b.size = SIZES[(SIZES.indexOf(b.size) + 1) % SIZES.length];
+      const n = nodes.get(b.id);
+      sizeImg(n.querySelector('.im'), n.querySelector('.fig'), b.w, b.h, CW * b.size / 100, MAX_IMG_H);
+      n.querySelector('.size-lbl').textContent = b.size + '%';
+      paginate();
+      break;
+    }
+    case 'dup':
+      if (dupHold.fired) { dupHold.fired = false; return; }         // holding already opened the copies panel
+      closeCopyPop(false);
+      if (e.shiftKey) openCopyPop(btn); else duplicateBlock(b.id, 1);
+      break;
+    case 'del':
+      if (!(armed.id === b.id && Date.now() < armed.until)) { arm(b.id); return; }
+      armed.id = null;
+      state.blocks.splice(i, 1);
+      nodes.delete(b.id);
+      activeId = null;
+      activeSeg = blk.closest('.doc-page').dataset.seg;
+      paginate();
+      break;
+    case 'pick': pickImage({ id: b.id, ci: +cellEl.dataset.ci }); break;
+    case 'embed-set': case 'embed-edit': case 'embed-clear': embedAction(btn.dataset.act, b, cellEl); break;
+    case 'tbl-row+': case 'tbl-row-': case 'tbl-col+': case 'tbl-col-': tableAction(btn.dataset.act, b, cellEl); break;
+    case 'sec-rowdel': secDelRow(b, +btn.dataset.row); break;
+    case 'unset': {
+      const ci = +cellEl.dataset.ci;
+      Object.assign(b.cells[ci], { src: null, w: 0, h: 0 });
+      fillSlot(cellEl.querySelector('.slot'), b.cells[ci], ci, b);
+      paginate();
+      break;
+    }
+  }
+});
+
+/* ---------- Adding content ---------- */
+function insertIndex() {
+  const len = state.blocks.length;
+  if (activeId) { const i = indexOf(activeId); if (i >= 0) return i + 1; }      // after the selected block
+  if (activeSeg === 'report') { const d = state.blocks.findIndex(b => b.type === 'docstart'); return d < 0 ? len : d; }   // at the end of the report part
+  if (activeSeg !== null) {                                                     // at the end of the selected page
+    const bi = indexOf(activeSeg);
+    if (bi < 0) return len;
+    let j = bi + 1;
+    while (j < len && state.blocks[j].type !== 'break' && state.blocks[j].type !== 'docstart') j++;
+    return j;
+  }
+  return len;                                                                   // otherwise at the end
+}
+function insert(blocks) {
+  state.blocks.splice(insertIndex(), 0, ...blocks);
+  activeId = blocks[blocks.length - 1].id;
+  activeSeg = null;
+}
+function addText() {
+  const b = { id: newId(), type: 'text', text: '' };
+  insert([b]);
+  paginate();
+  const ta = docRoot.querySelector(`textarea[data-block="${b.id}"]`);
+  if (ta) { ta.focus({ preventScroll: true }); keepInView(b.id); }
+}
+function addPair(variant = 'sketch') {
+  if (!VARIANTS[variant]) variant = 'sketch';
+  const empty = () => ({ src: null, w: 0, h: 0, text: '', url: '', table: null });
+  const b = { id: newId(), type: 'pair', variant, split: VARIANTS[variant].split, cells: [empty(), empty()] };
+  if (variant === 'table') b.cells[0].table = { rows: [['Point', 'Measured', 'Limit'], ['', '', ''], ['', '', ''], ['', '', '']] };
+  insert([b]);
+  paginate();
+  keepInView(b.id);
+  if (variant === 'embed') { const inp = docRoot.querySelector(`.blk[data-id="${b.id}"] .embed-input`); if (inp) inp.focus({ preventScroll: true }); }
+}
+function readImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth || 1200, hgt = img.naturalHeight || 900;
+      const scale = Math.min(1, MAX_PX / Math.max(w, hgt));
+      const cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(hgt * scale));
+      const canvas = h('canvas', null, { width: cw, height: ch });
+      const ctx = canvas.getContext('2d');
+      const keepPng = file.type === 'image/png' && scale === 1 && file.size < 1.5e6;   // screenshots stay sharp
+      if (!keepPng) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch); }
+      ctx.drawImage(img, 0, 0, cw, ch);
+      URL.revokeObjectURL(url);
+      resolve({ src: keepPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.86), w: cw, h: ch });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('unreadable')); };
+    img.src = url;
+  });
+}
+const isImage = f => f && /^image\//.test(f.type);
+async function addImages(files) {
+  const blocks = [];
+  for (const f of files.filter(isImage)) {
+    try { blocks.push({ id: newId(), type: 'image', ...(await readImage(f)), size: 100, caption: '' }); }
+    catch (_) { toast(`“${f.name}” could not be read. Use JPG or PNG.`); }
+  }
+  if (!blocks.length) return;
+  insert(blocks);
+  paginate();
+  keepInView(blocks[blocks.length - 1].id);
+}
+async function setCellImage(id, ci, file) {
+  const b = byId(id);
+  if (!b || !isImage(file)) return;
+  try { Object.assign(b.cells[ci], await readImage(file)); }
+  catch (_) { toast(`“${file.name}” could not be read. Use JPG or PNG.`); return; }
+  const n = nodes.get(id);
+  if (n) fillSlot(n.querySelector(`.cell[data-ci="${ci}"] .slot`), b.cells[ci], ci, b);
+  activeId = id;
+  paginate();
+}
+function pickImage(target) {
+  pickTarget = target;
+  fileImg.multiple = !target;
+  fileImg.value = '';
+  fileImg.click();
+}
+fileImg.addEventListener('change', () => {
+  const files = Array.from(fileImg.files || []);
+  const target = pickTarget;
+  pickTarget = null;
+  if (!files.length) return;
+  if (target) setCellImage(target.id, target.ci, files[0]); else addImages(files);
+});
+
+function dropTarget(t, files) {
+  const cell = t && t.closest('.blk-pair .cell');
+  if (cell && files.length === 1) {
+    const b = byId(cell.closest('.blk').dataset.id);
+    const ci = +cell.dataset.ci;
+    if (b && ['media', 'image'].includes(variantOf(b).kinds[ci]) && !b.cells[ci].src) { setCellImage(b.id, ci, files[0]); return; }
+  }
+  const blk = t && t.closest('.blk'), pg = t && t.closest('.doc-page');
+  if (blk) { activeId = blk.dataset.id; activeSeg = null; }
+  else if (pg) { activeId = null; activeSeg = pg.dataset.seg; }
+  addImages(files);
+}
+document.addEventListener('paste', e => {
+  if (isLocked()) return;
+  const t = e.target instanceof Element ? e.target : null;
+  const files = Array.from((e.clipboardData && e.clipboardData.files) || []).filter(isImage);
+  if (!files.length) {
+    const tc = t && t.closest('.tc'), txt = e.clipboardData ? e.clipboardData.getData('text/plain') : '';
+    if (tc && /[\t\n]/.test(txt.replace(/\r?\n$/, ''))) { e.preventDefault(); pasteGrid(tc, txt); return; }
+    const sd = t && t.closest('.blk-sec[data-kind="data"] .f');
+    if (sd && /[\t\n]/.test(txt.replace(/\r?\n$/, ''))) { e.preventDefault(); pasteGridSec(sd, txt); return; }
+    const f = t && t.closest('.f');
+    if (f && f.contentEditable === 'true') { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData.getData('text/plain')); }
+    return;
+  }
+  e.preventDefault();
+  dropTarget(t, files);
+});
+const hasFiles = e => Array.from((e.dataTransfer && e.dataTransfer.types) || []).includes('Files');
+window.addEventListener('dragover', e => { if (hasFiles(e)) { e.preventDefault(); pagesEl.classList.add('dragging'); } });
+window.addEventListener('dragleave', e => { if (!e.relatedTarget) pagesEl.classList.remove('dragging'); });
+window.addEventListener('drop', e => {
+  if (!hasFiles(e)) return;
+  e.preventDefault();
+  pagesEl.classList.remove('dragging');
+  if (isLocked()) return;
+  const all = Array.from(e.dataTransfer.files);
+  const json = all.find(f => /\.json$/i.test(f.name));
+  if (json) { openFile(json); return; }
+  const files = all.filter(isImage);
+  if (files.length) dropTarget(e.target instanceof Element ? e.target : null, files);
+});
+
+/* ---------- Global clicks ---------- */
+document.addEventListener('click', e => {
+  if (isLocked()) return;
+  const add = e.target.closest('[data-add]');
+  if (add) {
+    const k = add.dataset.add;
+    if (k === 'text') addText(); else if (k === 'image') pickImage(null); else addPair('sketch');
+    return;
+  }
+  const cb = e.target.closest('.cb');
+  if (cb) { toggle(cb); return; }
+  const cbCell = e.target.closest('td.c, th.lbl-check');
+  if (cbCell && !e.target.closest('[data-field]')) { const c = cbCell.querySelector('.cb'); if (c) toggle(c); }
+});
+document.addEventListener('mousedown', e => {
+  const cell = e.target.closest('td, th');
+  if (!cell || e.target.closest('.f, .tc, .cb, .row-del')) return;
+  const f = cell.querySelector('.f, .tc');
+  if (f) { e.preventDefault(); f.focus(); setCaret(f, Infinity); }
+});
+
+/* ---------- Save, open, clear, print ---------- */
+function serialize() {
+  const fields = {}, checks = {};
+  $$('[data-field]').forEach(el => { fields[el.dataset.field] = (el.innerText || '').replace(/\n+$/, ''); });
+  $$('[data-check]').forEach(el => { checks[el.dataset.check] = el.getAttribute('aria-checked') === 'true'; });
+  const settings = { pageNumbers: btnPageNo.getAttribute('aria-checked') === 'true', result: state.result };
+  return { format: FORMAT, version: 3, saved: new Date().toISOString(), settings, fields, checks, blocks: state.blocks };
+}
+function save() {
+  const data = serialize();
+  const nr = (data.fields.report_no || '').trim().replace(/[^\w.-]+/g, '_') || 'draft';
+  const a = h('a', null, { href: URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' })), download: `EnglishForm_${nr}.json` });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  toast('Draft saved as a file');
+}
+const dataImg = s => (typeof s === 'string' && s.startsWith('data:image/') ? s : null);
+function cleanBlock(b) {
+  if (!b || typeof b !== 'object') return null;
+  const id = newId();
+  if (b.type === 'break') return { id, type: 'break' };
+  if (b.type === 'headrow') {
+    const cols = Array.isArray(b.cols) ? b.cols.slice(0, HEAD_MAX).map(c => ({ t: typeof (c && c.t) === 'string' ? c.t.slice(0, 80) : '', w: +(c && c.w) || 0 })) : [];
+    return { id, type: 'headrow', place: PLACES.includes(b.place) ? b.place : 'flow', cols: normalizeCols(cols.length ? cols : [{ t: 'Image', w: 0.4 }, { t: 'Description', w: 0.6 }]) };
+  }
+  if (b.type === 'docstart') {
+    const d = docStart(), txt = (v, def, max) => (typeof v === 'string' ? v.slice(0, max) : def);
+    let cols = Array.isArray(b.cols) ? b.cols.slice(0, HEAD_MAX).map(c => ({ t: txt(c && c.t, '', 80), w: +(c && c.w) || 0 })) : [];
+    if (!cols.length) cols = [{ t: txt(b.left, d.cols[0].t, 80), w: 0.4 }, { t: txt(b.right, d.cols[1].t, 80), w: 0.6 }];   // saved before headings became a list
+    return { ...d, title: txt(b.title, d.title, 120), cols: normalizeCols(cols), heads: b.heads !== false, place: PLACES.includes(b.place) ? b.place : 'newpage', titleAll: b.titleAll !== false };
+  }
+  if (b.type === 'text') return { id, type: 'text', text: String(b.text ?? '') };
+  if (b.type === 'image' && dataImg(b.src)) return { id, type: 'image', src: b.src, w: +b.w || 0, h: +b.h || 0, size: SIZES.includes(b.size) ? b.size : 100, caption: String(b.caption ?? '') };
+  if (b.type === 'section') {
+    const kind = ['info', 'check', 'data'].includes(b.kind) ? b.kind : 'info';
+    const str = v => String(v ?? '').slice(0, 2000);
+    const rows = Array.isArray(b.rows) ? b.rows.slice(0, SEC_MAX_ROWS) : [];
+    const base = { id, type: 'section', kind, title: str(b.title).slice(0, 120), place: PLACES.includes(b.place) ? b.place : 'flow', split: !!b.split };
+    if (kind === 'info') {
+      const pairs = b.pairs === 1 ? 1 : 2;
+      const widths = Array.isArray(b.widths) && b.widths.length === 4 && b.widths.every(w => +w >= 10) && Math.abs(b.widths.reduce((a, w) => a + +w, 0) - CW) < 1 ? b.widths.map(Number) : null;
+      return { ...base, pairs, widths, rows: (rows.length ? rows : [[]]).map(r => Array.from({ length: pairs * 2 }, (_, i) => str(Array.isArray(r) ? r[i] : ''))) };
+    }
+    if (kind === 'check') {
+      const head = CHECK_HEAD.map((d, i) => str(Array.isArray(b.head) && b.head[i] != null ? b.head[i] : d));
+      return { ...base, head, rows: (rows.length ? rows : [{}]).map(r => (r && typeof r === 'object' && 'g' in r ? { g: str(r.g) }
+        : { t: str(r && r.t), m: str(r && r.m), ok: !!(r && r.ok), dev: !!(r && r.dev), c: str(r && r.c) })) };
+    }
+    const cols = Math.min(SEC_MAX_COLS, Math.max(1, ...rows.map(r => (Array.isArray(r) ? r.length : 0))));
+    const grid = rows.length >= 2 ? rows : [[], []];
+    return { ...base, rows: grid.map(r => Array.from({ length: cols }, (_, i) => str(Array.isArray(r) ? r[i] : ''))) };
+  }
+  if (b.type === 'pair') {
+    const variant = VARIANTS[b.variant] ? b.variant : 'sketch';
+    const cs = Array.isArray(b.cells) ? b.cells : [];
+    const cell = c => ({ src: dataImg(c && c.src), w: +(c && c.w) || 0, h: +(c && c.h) || 0, text: String((c && c.text) ?? ''),
+                         url: String((c && c.url) ?? '').slice(0, 4000), table: cleanTable(c && c.table) });
+    return { id, type: 'pair', variant, split: clampSplit(+b.split || VARIANTS[variant].split), cells: [cell(cs[0]), cell(cs[1])] };
+  }
+  return null;
+}
+async function openFile(file) {
+  try {
+    const data = JSON.parse(await file.text());
+    if (!data || data.format !== FORMAT) throw new Error('format');
+    $$('[data-field]').forEach(el => { el.textContent = (data.fields && data.fields[el.dataset.field]) ?? ''; });
+    $$('.f').forEach(markEmpty);
+    $$('[data-check]').forEach(el => el.setAttribute('aria-checked', data.checks && data.checks[el.dataset.check] ? 'true' : 'false'));
+    let blocks = (Array.isArray(data.blocks) ? data.blocks : []).map(cleanBlock).filter(Boolean);
+    if (!blocks.some(x => x.type === 'docstart')) blocks = [...buildReport({ fields: data.fields, checks: data.checks }), docStart(), ...blocks];   // older draft
+    state.blocks = blocks;
+    const rs = data.settings && data.settings.result;
+    state.result = {
+      title: rs && typeof rs.title === 'string' ? rs.title.slice(0, 120) : 'RESULT / CONCLUSION',
+      place: rs && PLACES.includes(rs.place) ? rs.place : (data.settings && data.settings.resultOwnPage ? 'alone' : 'flow')
+    };
+    setResultTitle();
+    setPageNumbers(!(data.settings && data.settings.pageNumbers === false));
+    nodes.clear();
+    activeId = null;
+    activeSeg = null;
+    paginate();
+    toast('Draft opened');
+  } catch (_) {
+    toast('Could not open the file. Choose a draft (.json) saved from this form.');
+  }
+}
+function clearForm() {
+  $$('[data-field]').forEach(el => { if (!el.hasAttribute('data-keep')) el.textContent = ''; });   // title and footer are kept
+  $$('.f').forEach(markEmpty);
+  $$('[data-check]').forEach(el => el.setAttribute('aria-checked', 'false'));
+  state.blocks = state.blocks.filter(b => b.type === 'section' || b.type === 'docstart' || b.type === 'headrow').map(b => (b.type === 'section' ? clearTable(b) : b));   // tables stay as a template
+  state.result.place = 'flow';
+  nodes.clear();
+  activeId = null;
+  activeSeg = null;
+  paginate();
+  window.scrollTo({ top: 0, behavior: smooth() });
+  toast('Form cleared');
+}
+$('#btnSave').addEventListener('click', save);
+$('#btnOpen').addEventListener('click', () => { fileJson.value = ''; fileJson.click(); });
+fileJson.addEventListener('change', () => { const f = fileJson.files && fileJson.files[0]; if (f) openFile(f); });
+$('#btnPrint').addEventListener('click', () => { paginate(); window.print(); });
+$('#btnClear').addEventListener('click', e => {
+  const b = e.currentTarget, label = b.querySelector('span');
+  if (b.classList.contains('warn')) { b.classList.remove('warn'); label.textContent = 'Clear form'; clearForm(); return; }
+  b.classList.add('warn');
+  label.textContent = 'Click again to clear';
+  setTimeout(() => { b.classList.remove('warn'); label.textContent = 'Clear form'; }, 3000);
+});
+function setZoom(z) {
+  docZoom = z;
+  document.documentElement.style.setProperty('--doc-zoom', z.toFixed(4));
+}
+function fitZoom() {                                       // phones: scale the pages so they fit the screen width
+  const z = Math.min(1, Math.max(0.3, (document.documentElement.clientWidth - 24) / (210 * MM)));
+  if (Math.abs(z - docZoom) < 0.001) return false;
+  setZoom(z);
+  return true;
+}
+let zoomTimer = 0;
+window.addEventListener('resize', () => { clearTimeout(zoomTimer); zoomTimer = setTimeout(() => { if (fitZoom()) paginate(); }, 150); });
+window.addEventListener('beforeprint', () => { setZoom(1); paginate(); });   // print at full size
+window.addEventListener('afterprint', () => { if (fitZoom()) paginate(); });
+
+let toastTimer = 0;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3400);
+}
+
+/* ---------- Two-column rows: divider ---------- */
+let lastHandleDown = { id: null, t: 0 };
+function applySplit(n, b) {
+  b.split = clampSplit(b.split);
+  n.style.setProperty('--split', (b.split * CW).toFixed(2) + 'mm');
+  const hdl = n.querySelector('.col-handle'), pct = Math.round(b.split * 100);
+  hdl.setAttribute('aria-valuenow', String(pct));
+  hdl.setAttribute('aria-valuetext', `${pct}% / ${100 - pct}%`);
+  hdl.firstElementChild.textContent = `${pct} : ${100 - pct}`;
+  b.cells.forEach((cell, ci) => {
+    const c = n.children[ci];
+    const img = c.querySelector('.imwrap .im');
+    if (img) sizeImg(img, img.parentElement, cell.w, cell.h, cellW(b, ci), MAX_CELL_H);
+    const fr = c.querySelector('.embed-frame');
+    if (fr) sizeEmbedFrame(fr, cellW(b, ci));
+    if (n.isConnected) $$('textarea', c).forEach(autosize);
+  });
+}
+docRoot.addEventListener('pointerdown', e => {
+  const hdl = e.target.closest('.col-handle');
+  if (!hdl || e.button !== 0) return;
+  const n = hdl.closest('.blk'), b = n && byId(n.dataset.id);
+  if (!b) return;
+  e.preventDefault();
+  hdl.focus({ preventScroll: true });
+  const now = Date.now();
+  if (lastHandleDown.id === b.id && now - lastHandleDown.t < 400) {   // double-click: reset to the default split
+    lastHandleDown = { id: null, t: 0 };
+    b.split = variantOf(b).split;
+    applySplit(n, b);
+    paginate();
+    return;
+  }
+  lastHandleDown = { id: b.id, t: now };
+  let moved = false;
+  const rect = n.getBoundingClientRect();
+  hdl.setPointerCapture(e.pointerId);
+  n.classList.add('resizing');
+  document.body.classList.add('dragging-split');
+  const move = ev => {
+    let v = clampSplit((ev.clientX - rect.left) / rect.width);
+    for (const snap of rowSnaps(n)) if (Math.abs(v - snap) < SNAP_TOL) v = snap;
+    if (v !== b.split) { b.split = v; moved = true; applySplit(n, b); queueEmbeds(); }
+  };
+  const end = () => {
+    hdl.removeEventListener('pointermove', move);
+    hdl.removeEventListener('pointerup', end);
+    hdl.removeEventListener('pointercancel', end);
+    n.classList.remove('resizing');
+    document.body.classList.remove('dragging-split');
+    if (moved) { lastHandleDown = { id: null, t: 0 }; paginate(); }   // a plain click leaves the layout untouched
+  };
+  hdl.addEventListener('pointermove', move);
+  hdl.addEventListener('pointerup', end);
+  hdl.addEventListener('pointercancel', end);
+});
+docRoot.addEventListener('keydown', e => {
+  if (e.target instanceof Element && e.target.matches('.embed-input') && e.key === 'Enter') {
+    e.preventDefault();
+    e.target.closest('.embed').querySelector('[data-act="embed-set"]').click();
+    return;
+  }
+  const hdl = e.target instanceof Element ? e.target.closest('.col-handle') : null, n = hdl && hdl.closest('.blk'), b = n && byId(n.dataset.id);
+  if (!b || !['ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) return;
+  e.preventDefault();
+  const step = e.shiftKey ? 0.05 : 0.01;
+  b.split = e.key === 'Enter' ? variantOf(b).split : b.split + (e.key === 'ArrowLeft' ? -step : step);
+  applySplit(n, b);
+  queueEmbeds();
+  schedule(300);
+});
+
+/* ---------- Web content (video, map, web page) ---------- */
+function parseEmbed(input) {
+  let raw = String(input || '').trim();
+  if (!raw) return null;
+  const tag = raw.match(/<iframe[^>]*\ssrc\s*=\s*["']([^"']+)["']/i);
+  if (tag) { raw = tag[1].replace(/&amp;/g, '&'); if (!/^https?:\/\//i.test(raw)) return null; }
+  let u = null;
+  if (/^https?:\/\//i.test(raw)) { try { u = new URL(raw); } catch (_) { return null; } }
+  else if (/^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(raw)) { try { u = new URL('https://' + raw); } catch (_) { return null; } }
+  if (!u) {                                                               // plain text: treat it as an address
+    const q = encodeURIComponent(raw);
+    return { kind: 'map', src: `https://www.google.com/maps?q=${q}&output=embed`, link: `https://www.google.com/maps/search/?api=1&query=${q}`, label: raw, print: `Map – ${raw}` };
+  }
+  const host = u.hostname.replace(/^(www|m)\./, '');
+  let yt = null;
+  if (host === 'youtube.com' || host === 'youtube-nocookie.com') yt = u.searchParams.get('v') || (u.pathname.match(/^\/(?:embed|shorts|live)\/([\w-]{6,})/) || [])[1];
+  if (host === 'youtu.be') yt = u.pathname.slice(1).split('/')[0];
+  if (yt && /^[\w-]{6,}$/.test(yt)) return { kind: 'video', src: `https://www.youtube-nocookie.com/embed/${yt}`, link: `https://www.youtube.com/watch?v=${yt}`, label: 'YouTube video', print: 'Video – YouTube' };
+  const vm = /(^|\.)vimeo\.com$/.test(host) && u.pathname.match(/(\d{6,})/);
+  if (vm) return { kind: 'video', src: `https://player.vimeo.com/video/${vm[1]}`, link: `https://vimeo.com/${vm[1]}`, label: 'Vimeo video', print: 'Video – Vimeo' };
+  if (/(^|\.)google\.[a-z.]+$/.test(host) && u.pathname.startsWith('/maps')) {
+    if (u.pathname.startsWith('/maps/embed')) return { kind: 'map', src: u.href, link: u.href, label: 'Google Maps', print: 'Map – Google Maps' };
+    const at = u.pathname.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:,(\d+(?:\.\d+)?)z)?/);
+    const place = u.pathname.match(/\/maps\/(?:place|search)\/([^/@]+)/);
+    const q = at ? `${at[1]},${at[2]}` : (u.searchParams.get('q') || u.searchParams.get('query') || (place ? decodeURIComponent(place[1].replace(/\+/g, ' ')) : ''));
+    if (q) return { kind: 'map', src: `https://www.google.com/maps?q=${encodeURIComponent(q)}${at && at[3] ? `&z=${Math.round(+at[3])}` : ''}&output=embed`, link: u.href, label: 'Google Maps', print: 'Map – Google Maps' };
+  }
+  if (host === 'openstreetmap.org' && u.pathname.startsWith('/export/embed')) return { kind: 'map', src: u.href, link: u.href, label: 'OpenStreetMap', print: 'Map – OpenStreetMap' };
+  return { kind: 'page', src: u.href, link: u.href, label: host, print: `Web page – ${host}` };
+}
+const embedEditing = new Set();
+function sizeEmbedFrame(fr, wmm) { fr.style.height = (wmm * +fr.dataset.ratio).toFixed(2) + 'mm'; }
+function fillEmbed(el, b, ci) {
+  const cell = b.cells[ci], key = `${b.id}-${ci}`;
+  const info = cell.url ? parseEmbed(cell.url) : null;
+  el.replaceChildren();
+  if (!info || embedEditing.has(key)) {
+    const box = h('div', 'embed-empty');
+    box.innerHTML = '<b>Web content</b><div class="embed-row"><input class="embed-input" type="text" aria-label="Link, embed code or address" placeholder="YouTube or Vimeo link, Google Maps link or address, web address"><button type="button" class="embed-go" data-act="embed-set">Embed</button></div><p>Shown live on screen. When printed, the link is shown instead.</p>';
+    box.querySelector('input').value = cell.url || '';
+    el.append(box);
+    return;
+  }
+  const frame = h('div', 'embed-frame', { textContent: 'Loading …' });
+  frame.dataset.key = key;
+  frame.dataset.src = info.src;
+  frame.dataset.label = info.label;
+  frame.dataset.ratio = info.kind === 'video' ? '0.5625' : '0.75';
+  const bar = h('div', 'embed-bar');
+  const lbl = h('span', 'lbl', { textContent: info.label, title: info.link });
+  const open = h('a', null, { href: info.link, target: '_blank', rel: 'noopener noreferrer', textContent: 'Open ↗' });
+  const edit = h('button', null, { type: 'button', textContent: 'Change' });
+  const clear = h('button', null, { type: 'button', textContent: 'Remove' });
+  edit.dataset.act = 'embed-edit';
+  clear.dataset.act = 'embed-clear';
+  bar.append(lbl, open, edit, clear);
+  const pr = h('div', 'embed-print');
+  pr.append(h('b', null, { textContent: info.print }), h('span', null, { textContent: info.link }));
+  el.append(frame, bar, pr);
+  sizeEmbedFrame(frame, cellW(b, ci));
+}
+function embedAction(act, b, cellEl) {
+  const ci = +cellEl.dataset.ci, key = `${b.id}-${ci}`, el = cellEl.querySelector('.embed');
+  if (act === 'embed-set') {
+    const inp = el.querySelector('.embed-input'), raw = inp.value.trim();
+    if (!raw) { inp.focus(); return; }
+    if (!parseEmbed(raw)) { toast('That could not be embedded. Use a web address starting with https://'); return; }
+    b.cells[ci].url = raw;
+    embedEditing.delete(key);
+  } else if (act === 'embed-edit') embedEditing.add(key);
+  else { b.cells[ci].url = ''; embedEditing.delete(key); }
+  fillEmbed(el, b, ci);
+  paginate();
+  if (act !== 'embed-set') { const inp = el.querySelector('.embed-input'); if (inp) inp.focus({ preventScroll: true }); }
+}
+// live iframes sit in a fixed layer over their placeholder, so re-laying out pages never reloads them
+const embedLayer = h('div', 'embed-layer');
+pagesEl.append(embedLayer);
+const liveFrames = new Map();
+let embedRaf = 0;
+const queueEmbeds = () => { if (!embedRaf) embedRaf = requestAnimationFrame(() => { embedRaf = 0; syncEmbeds(); }); };
+const blkRO = 'ResizeObserver' in window ? new ResizeObserver(queueEmbeds) : null;
+function syncEmbeds() {
+  if (isLocked()) return;
+  const base = pagesEl.getBoundingClientRect(), seen = new Set();
+  $$('.embed-frame[data-key]', docRoot).forEach(ph => {
+    const key = ph.dataset.key;
+    seen.add(key);
+    let live = liveFrames.get(key);
+    if (!live || live.src !== ph.dataset.src) {
+      if (live) live.wrap.remove();
+      const wrap = h('div', 'embed-live');
+      const iframe = h('iframe', null, { src: ph.dataset.src, title: ph.dataset.label, loading: 'lazy', referrerPolicy: 'strict-origin-when-cross-origin' });
+      iframe.setAttribute('allow', 'fullscreen; picture-in-picture; encrypted-media');
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-presentation allow-forms');
+      wrap.append(iframe);
+      const blockId = key.split('-')[0];                       // pointing at a live embed shows its row's buttons
+      wrap.addEventListener('pointerenter', () => { const n = docRoot.querySelector(`.blk[data-id="${blockId}"]`); if (n) n.classList.add('embed-hover'); });
+      wrap.addEventListener('pointerleave', () => { $$('.blk.embed-hover', docRoot).forEach(n => n.classList.remove('embed-hover')); });
+      embedLayer.append(wrap);
+      live = { wrap, src: ph.dataset.src };
+      liveFrames.set(key, live);
+    }
+    const r = ph.getBoundingClientRect();
+    Object.assign(live.wrap.style, { left: (r.left - base.left) + 'px', top: (r.top - base.top) + 'px', width: r.width + 'px', height: r.height + 'px' });
+  });
+  for (const [key, live] of liveFrames) if (!seen.has(key)) { live.wrap.remove(); liveFrames.delete(key); }
+}
+window.addEventListener('resize', queueEmbeds);
+document.addEventListener('input', queueEmbeds);
+
+/* ---------- Measurement table ---------- */
+const TBL_MAX_COLS = 8, TBL_MAX_ROWS = 60;
+function cleanTable(t) {
+  if (!t || !Array.isArray(t.rows) || !t.rows.length) return null;
+  const cols = Math.min(TBL_MAX_COLS, Math.max(1, ...t.rows.map(r => (Array.isArray(r) ? r.length : 0))));
+  return { rows: t.rows.slice(0, TBL_MAX_ROWS).map(r => Array.from({ length: cols }, (_, i) => String((Array.isArray(r) && r[i]) ?? ''))) };
+}
+function fillTable(wrap, b, ci) {
+  const cell = b.cells[ci];
+  if (!cell.table) cell.table = { rows: [['Point', 'Measured', 'Limit'], ['', '', ''], ['', '', '']] };
+  const t = h('table', 'mtable');
+  cell.table.rows.forEach((row, ri) => {
+    const tr = t.insertRow();
+    row.forEach((val, cj) => {
+      const d = h('div', 'tc', { textContent: val });
+      d.dataset.r = String(ri);
+      d.dataset.c = String(cj);
+      makeEditable(d);
+      tr.insertCell().append(d);
+    });
+  });
+  const tools = h('div', 'tbl-tools');
+  tools.innerHTML = '<button type="button" data-act="tbl-row+">+ Row</button><button type="button" data-act="tbl-row-">− Row</button><button type="button" data-act="tbl-col+">+ Column</button><button type="button" data-act="tbl-col-">− Column</button>';
+  wrap.replaceChildren(t, tools);
+}
+function syncTableCell(tc) {
+  const n = tc.closest('.blk'), b = n && byId(n.dataset.id);
+  if (!b) return;
+  const rows = b.cells[+tc.closest('.cell').dataset.ci].table.rows;
+  rows[+tc.dataset.r][+tc.dataset.c] = (tc.innerText || '').replace(/\n$/, '');
+}
+function tableAction(act, b, cellEl) {
+  const ci = +cellEl.dataset.ci, rows = b.cells[ci].table.rows, cols = rows[0].length;
+  if (act === 'tbl-row+' && rows.length < TBL_MAX_ROWS) rows.push(Array(cols).fill(''));
+  if (act === 'tbl-row-' && rows.length > 2) rows.pop();
+  if (act === 'tbl-col+' && cols < TBL_MAX_COLS) rows.forEach(r => r.push(''));
+  if (act === 'tbl-col-' && cols > 1) rows.forEach(r => r.pop());
+  fillTable(cellEl.querySelector('.mtable-wrap'), b, ci);
+  paginate();
+}
+function pasteGrid(tc, text) {
+  const n = tc.closest('.blk'), b = n && byId(n.dataset.id);
+  if (!b) return;
+  const ci = +tc.closest('.cell').dataset.ci, rows = b.cells[ci].table.rows;
+  const grid = text.replace(/\r/g, '').replace(/\n$/, '').split('\n').map(line => line.split('\t'));
+  const r0 = +tc.dataset.r, c0 = +tc.dataset.c;
+  const needCols = Math.min(TBL_MAX_COLS, Math.max(rows[0].length, c0 + Math.max(...grid.map(g => g.length))));
+  rows.forEach(r => { while (r.length < needCols) r.push(''); });
+  grid.forEach((g, i) => {
+    const ri = r0 + i;
+    if (ri >= TBL_MAX_ROWS) return;
+    while (rows.length <= ri) rows.push(Array(needCols).fill(''));
+    g.forEach((val, j) => { if (c0 + j < needCols) rows[ri][c0 + j] = val.trim(); });
+  });
+  fillTable(n.querySelector(`.cell[data-ci="${ci}"] .mtable-wrap`), b, ci);
+  paginate();
+  toast(`Pasted ${grid.length} × ${Math.max(...grid.map(g => g.length))} cells`);
+}
+
+/* ---------- Toolbar dropdown: two-column rows ---------- */
+const colsToggle = $('#colsToggle'), colsMenu = $('#colsMenu');
+function setColsMenu(open) {
+  colsMenu.hidden = !open;
+  colsToggle.setAttribute('aria-expanded', String(open));
+  if (open) colsMenu.querySelector('.pm-item').focus();
+}
+colsToggle.addEventListener('click', () => setColsMenu(colsMenu.hidden));
+document.addEventListener('pointerdown', e => { if (!colsMenu.hidden && !colsToggle.parentElement.contains(e.target)) setColsMenu(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !colsMenu.hidden) { setColsMenu(false); colsToggle.focus(); } });
+colsMenu.addEventListener('keydown', e => {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  const items = $$('.pm-item', colsMenu), i = Math.max(0, items.indexOf(document.activeElement));
+  items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+});
+colsMenu.addEventListener('click', e => {
+  const it = e.target.closest('[data-cols]');
+  if (!it) return;
+  setColsMenu(false);
+  addPair(it.dataset.cols);
+});
+
+/* ---------- Table sections (information table, checklist, data table) ---------- */
+const CHECK_HEAD = ['No.', 'Control point', 'Method', 'OK', 'Deviation', 'Comment / value'];
+const SEC_MAX_ROWS = 80, SEC_MAX_COLS = 8;
+const PLACES = ['flow', 'newpage', 'alone', 'bottom', 'bottomalone'];
+const KV_WIDTHS = [30, 44, 24, 82];
+const LABEL_HINTS = {                                   // grey hints for known labels; other labels hint with their own text
+  'Client:': 'Client name', 'Report no.:': 'Report number', 'Site / project:': 'Site or project', 'Date:': 'e.g. 14 Sep 2026',
+  'Object / component:': 'What is inspected', 'Inspector:': 'Name', 'Location / position:': 'Where on site', 'Certificate no.:': 'Certificate no. / level',
+  'Drawing / ID:': 'Drawing no. or ID', 'Material:': 'Material or type', 'Instrument / tool:': 'Instrument or tool', 'Serial no.:': 'Serial number',
+  'Sensor / accessory:': 'Sensor or accessory', 'Accessory ID:': 'ID or serial no.', 'Measuring range:': 'e.g. 0 – 20 t', 'Resolution / accuracy:': 'e.g. ±0.1 %',
+  'Reference standard:': 'Reference or cal. certificate', 'Calibration date:': 'Date', 'Settings:': 'Instrument settings', 'Calibration valid to:': 'Date',
+  'Consumables:': 'e.g. marking paint', 'Correction factor:': 'If applicable', 'Procedure / standard:': 'Procedure or standard', 'Acceptance criteria:': 'Acceptance criteria'
+};
+const valueHint = label => LABEL_HINTS[(label || '').trim()] || (label || '').replace(/[\s:]+$/, '') || 'Value';
+const REPORT_KV = [
+  ['GENERAL INFORMATION', [
+    ['Client:', 'client', 'Harbour & Pine Ltd', 'Report no.:', 'report_no', 'IR-2026-0142'],
+    ['Site / project:', 'site', 'Warehouse 3, North Quay', 'Date:', 'date', '14 Sep 2026'],
+    ['Object / component:', 'object', 'Overhead crane OC-3', 'Inspector:', 'inspector', 'Jordan Hale'],
+    ['Location / position:', 'location', 'Bay 2 – runway and hoist', 'Certificate no.:', 'certificate', 'INS-2291 Level 2'],
+    ['Drawing / ID:', 'drawing', '', 'Material:', 'material', 'Structural steel']]],
+  ['EQUIPMENT / CALIBRATION', [
+    ['Instrument / tool:', 'instrument', 'Digital load cell DLC-20', 'Serial no.:', 'instrument_sn', 'DLC20-55812'],
+    ['Sensor / accessory:', 'accessory', 'Shackle set 12 t', 'Accessory ID:', 'accessory_id', 'SH12-004'],
+    ['Measuring range:', 'range', '0 – 20 t', 'Resolution / accuracy:', 'accuracy', '0.01 t / ±0.1 %'],
+    ['Reference standard:', 'reference_std', 'Cal. cert. CC-26-311', 'Calibration date:', 'cal_date', '02 Mar 2026'],
+    ['Settings:', 'settings', 'Peak hold, tonnes', 'Calibration valid to:', 'cal_valid', '02 Mar 2027'],
+    ['Consumables:', 'consumables', '', 'Correction factor:', 'correction', ''],
+    ['Procedure / standard:', 'procedure', 'Procedure LR-QP-07', 'Acceptance criteria:', 'acceptance', "Manufacturer's limits"]]]
+];
+const REPORT_CHECKS = [
+  'A. PREPARATION',
+  ['Inspection area identified and accessible', 'VT', ''],
+  ['Surface cleaned and suitable for inspection', 'VT', 'Minor surface rust, no section loss'],
+  ['Material, dimensions and geometry verified', 'Meas.', 'Beam dimensions match drawing'],
+  ['Instruments and equipment checked before inspection', 'Func.', 'Load cell zeroed before test'],
+  'B. POST-INSPECTION / RESULT',
+  ['Findings assessed against acceptance criteria', 'VT', 'No findings above limits'],
+  ['Equipment calibration checked after inspection', 'Func.', 'Load cell within tolerance after test'],
+  ['Areas / findings marked where required', 'VT', 'No marking required']
+];
+// the three tables on page 1: example data, or the values from a draft saved before they became tables
+function buildReport(legacy) {
+  const val = (key, example) => (legacy ? String((legacy.fields || {})[key] ?? '') : example);
+  const out = REPORT_KV.map(([title, rows]) => ({ id: newId(), type: 'section', kind: 'info', title, place: 'flow', split: false, pairs: 2, widths: KV_WIDTHS.slice(),
+    rows: rows.map(r => [r[0], val(r[1], r[2]), r[3], val(r[4], r[5])]) }));
+  let n = 0;
+  out.push({ id: newId(), type: 'section', kind: 'check', title: 'CONTROL POINTS', place: 'flow', split: false, head: CHECK_HEAD.slice(),
+    rows: REPORT_CHECKS.map(r => {
+      if (typeof r === 'string') return { g: r };
+      n++;
+      const ch = legacy ? legacy.checks || {} : null;
+      return { t: r[0], m: val(`k${n}_method`, r[1]), ok: ch ? !!ch[`k${n}_ok`] : true, dev: ch ? !!ch[`k${n}_dev`] : false, c: val(`k${n}_comment`, r[2]) };
+    }) });
+  return out;
+}
+const HEAD_MAX = 6, HEAD_MIN = 0.1;
+const headDefaults = n => (n === 2 ? [0.4, 0.6] : Array(n).fill(1 / n));
+const docStart = () => ({ id: newId(), type: 'docstart', title: 'INSPECTION AREA / PHOTO / SKETCH', heads: true, place: 'newpage', titleAll: true,
+  cols: [{ t: 'Sketch / measuring points', w: 0.4 }, { t: 'Photo / documentation', w: 0.6 }] });
+function normalizeCols(cols) {                            // widths are fractions of the page width that add up to 1
+  if (cols.some(c => !(c.w > 0))) headDefaults(cols.length).forEach((w, i) => { cols[i].w = w; });
+  cols.forEach(c => { c.w = Math.max(c.w, HEAD_MIN); });
+  const sum = cols.reduce((a, c) => a + c.w, 0);
+  cols.forEach(c => { c.w /= sum; });
+  return cols;
+}
+function clearTable(b) {                                  // keep a table's structure, empty what was filled in
+  if (b.kind === 'info') b.rows.forEach(r => { for (let i = 1; i < r.length; i += 2) r[i] = ''; });
+  if (b.kind === 'check') b.rows.forEach(r => { if (!('g' in r)) Object.assign(r, { m: '', c: '', ok: false, dev: false }); });
+  if (b.kind === 'data') b.rows.forEach((r, i) => { if (i) r.fill(''); });
+  return b;
+}
+let secOverride = null;
+function applyOverride(b, root) {
+  if (!secOverride || secOverride.id !== b.id) return;
+  const d = root.querySelector(`[data-k="${secOverride.k}"]`);
+  if (d) { d.textContent = secOverride.raw; markEmpty(d); }
+}
+const CB_MARK = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.6 1.6l6.8 6.8M8.4 1.6l-6.8 6.8"/></svg>';
+const newItem = () => ({ t: '', m: '', ok: false, dev: false, c: '' });
+function secCols(b) {
+  if (b.kind === 'info') { const w = b.widths || [30, 60, 30, 60]; return b.pairs === 1 ? [w[0], CW - w[0]] : w; }
+  if (b.kind === 'check') return [7.5, 52, 15, 9.5, 18, 78];
+  return Array(b.rows[0].length).fill(CW / b.rows[0].length);
+}
+const secBody = b => (b.kind === 'data' ? b.rows.length - 1 : b.rows.length);
+const secTitle = (b, cont) => (b.title.trim() || 'Untitled table') + (cont ? ' (continued)' : '');
+function secField(tag, key, value, hint, cls) {
+  const cell = document.createElement(tag);
+  if (cls) cell.className = cls;
+  const d = h('div', 'f', { textContent: value || '' });
+  d.dataset.k = key;
+  d.dataset.hint = hint;
+  makeEditable(d);
+  markEmpty(d);
+  cell.append(d);
+  return cell;
+}
+function secHeader(b, cont) {
+  const n = h('div', 'blk blk-sec');
+  n.dataset.id = b.id;
+  n.dataset.kind = b.kind;
+  const cols = secCols(b);
+  const t = h('table', 'grid sec-table ' + (b.kind === 'info' ? 'kv' : 'checks'));
+  const cg = document.createElement('colgroup');
+  cols.forEach(w => { const c = document.createElement('col'); c.style.width = w + 'mm'; cg.append(c); });
+  const thead = document.createElement('thead');
+  const band = h('th', 'band sec-band', { tabIndex: 0, colSpan: cols.length, title: 'Table settings: rename, add rows, page logic' });
+  band.setAttribute('role', 'button');
+  band.setAttribute('aria-haspopup', 'dialog');
+  band.append(h('span', 'sec-title', { textContent: secTitle(b, cont) }), h('span', 'sec-gear', { innerHTML: svg(ICON.gear) }));
+  thead.insertRow().append(band);
+  if (b.kind !== 'info') {
+    const tr = thead.insertRow();
+    tr.className = 'colhead';
+    (b.kind === 'check' ? b.head : b.rows[0]).forEach((v, i) => tr.append(secField('th', (b.kind === 'check' ? 'h,' : '0,') + i, v, 'Heading')));
+  }
+  t.append(cg, thead, document.createElement('tbody'));
+  n.append(t, controls(b));
+  applyOverride(b, n);
+  return n;
+}
+function secRow(b, i) {                                    // i = body row index
+  const tr = document.createElement('tr');
+  if (b.kind === 'info') {
+    const r = b.rows[i];
+    for (let p = 0; p < b.pairs; p++) tr.append(secField('th', `${i},${p * 2}`, r[p * 2], 'Label'), secField('td', `${i},${p * 2 + 1}`, r[p * 2 + 1], valueHint(r[p * 2])));
+  } else if (b.kind === 'check') {
+    const r = b.rows[i];
+    if ('g' in r) {
+      tr.className = 'group';
+      const td = secField('td', `${i},g`, r.g, 'Group title, e.g. A. PREPARATION');
+      td.colSpan = 6;
+      tr.append(td);
+    } else {
+      const num = b.rows.slice(0, i + 1).filter(x => !('g' in x)).length;
+      const box = (k, label) => {
+        const td = h('td', 'c'), cb = h('button', 'cb', { type: 'button', innerHTML: CB_MARK });
+        cb.setAttribute('role', 'checkbox');
+        cb.setAttribute('aria-checked', String(!!r[k]));
+        cb.setAttribute('aria-label', `Item ${num} ${label}`);
+        cb.dataset.k = `${i},${k}`;
+        td.append(cb);
+        return td;
+      };
+      tr.append(h('td', 'c', { textContent: String(num) }), secField('td', `${i},t`, r.t, 'Control point'), secField('td', `${i},m`, r.m, 'e.g. VT', 'c'),
+        box('ok', 'OK'), box('dev', 'deviation'), secField('td', `${i},c`, r.c, 'Comment or measured value'));
+    }
+  } else {
+    b.rows[i + 1].forEach((v, c) => tr.append(secField('td', `${i + 1},${c}`, v, '')));
+  }
+  const del = h('button', 'row-del', { type: 'button', title: 'Remove row', innerHTML: svg(ICON.x) });
+  del.setAttribute('aria-label', 'Remove row');
+  del.dataset.act = 'sec-rowdel';
+  del.dataset.row = String(b.kind === 'data' ? i + 1 : i);
+  tr.firstElementChild.append(del);
+  applyOverride(b, tr);
+  return tr;
+}
+function syncSecCell(el) {
+  const n = el.closest('.blk-sec'), b = n && byId(n.dataset.id);
+  if (!b) return;
+  const [r, k] = el.dataset.k.split(','), v = (el.innerText || '').replace(/\n$/, '');
+  if (b.kind === 'check') { if (r === 'h') b.head[+k] = v; else b.rows[+r][k] = v; }
+  else b.rows[+r][+k] = v;
+}
+function syncSecCheck(cb) {
+  const n = cb.closest('.blk-sec'), b = n && byId(n.dataset.id);
+  if (!b) return;
+  const [r, k] = cb.dataset.k.split(',');
+  b.rows[+r][k] = cb.getAttribute('aria-checked') === 'true';
+}
+function secDelRow(b, r) {
+  const min = b.kind === 'data' ? 2 : 1;
+  if (b.rows.length <= min) { toast('A table needs at least one row'); return; }
+  b.rows.splice(r, 1);
+  paginate();
+}
+function setPairs(b, p) {
+  if (b.pairs === p) return;
+  const flat = b.rows.flatMap(r => [[r[0], r[1]], ...(r.length > 2 ? [[r[2], r[3]]] : [])]);
+  if (p === 1) b.rows = flat;
+  else { b.rows = []; for (let i = 0; i < flat.length; i += 2) b.rows.push([...flat[i], ...(flat[i + 1] || ['', ''])]); }
+  b.pairs = p;
+}
+function secTool(b, tool) {
+  if (b.rows.length >= SEC_MAX_ROWS && tool !== 'addcol' && tool !== 'delcol') { toast('A table can have up to 80 rows'); return; }
+  if (tool === 'addrow') b.rows.push(Array(b.kind === 'info' ? b.pairs * 2 : b.rows[0].length).fill(''));
+  if (tool === 'additem') b.rows.push(newItem());
+  if (tool === 'addgroup') b.rows.push({ g: '' });
+  if (tool === 'addcol' && b.rows[0].length < SEC_MAX_COLS) b.rows.forEach(r => r.push(''));
+  if (tool === 'delcol' && b.rows[0].length > 1) b.rows.forEach(r => r.pop());
+}
+function pasteGridSec(el, text) {
+  const n = el.closest('.blk-sec'), b = n && byId(n.dataset.id);
+  if (!b) return;
+  const [r0, c0] = el.dataset.k.split(',').map(Number);
+  const grid = text.replace(/\r/g, '').replace(/\n$/, '').split('\n').map(line => line.split('\t'));
+  const wide = Math.max(...grid.map(g => g.length));
+  const need = Math.min(SEC_MAX_COLS, Math.max(b.rows[0].length, c0 + wide));
+  b.rows.forEach(r => { while (r.length < need) r.push(''); });
+  grid.forEach((g, i) => {
+    const ri = r0 + i;
+    if (ri >= SEC_MAX_ROWS) return;
+    while (b.rows.length <= ri) b.rows.push(Array(need).fill(''));
+    g.forEach((val, j) => { if (c0 + j < need) b.rows[ri][c0 + j] = val.trim(); });
+  });
+  paginate();
+  toast(`Pasted ${grid.length} × ${wide} cells`);
+}
+function addSection(kind) {
+  const base = { id: newId(), type: 'section', kind, place: 'flow', split: false };
+  const b = kind === 'check' ? { ...base, title: 'CONTROL POINTS', head: CHECK_HEAD.slice(), rows: [{ g: '' }, newItem(), newItem(), newItem()] }
+    : kind === 'data' ? { ...base, title: 'DATA TABLE', rows: [['', '', ''], ['', '', ''], ['', '', ''], ['', '', '']] }
+    : { ...base, kind: 'info', title: 'INFORMATION', pairs: 2, rows: [['', '', '', ''], ['', '', '', ''], ['', '', '', '']] };
+  insert([b]);
+  paginate();
+  keepInView(b.id);
+  openSecPop(b.id);
+}
+
+/* Settings panel opened from a table's title bar */
+/* ---------- Duplicating two-column rows ---------- */
+const COPY_MAX = 50;
+function cloneBlock(b) {                                   // independent copy (images are shared, unchangeable data)
+  const copy = { ...b, id: newId() };
+  if (b.type === 'pair') copy.cells = b.cells.map(c => ({ ...c, table: c.table ? { rows: c.table.rows.map(r => r.slice()) } : null }));
+  return copy;
+}
+function duplicateBlock(id, count) {
+  const i = indexOf(id);
+  if (i < 0) return;
+  const n = Math.max(1, Math.min(COPY_MAX, Math.round(count) || 1));
+  const copies = Array.from({ length: n }, () => cloneBlock(state.blocks[i]));
+  state.blocks.splice(i + 1, 0, ...copies);                // placed directly underneath, in order
+  activeId = copies[n - 1].id;
+  activeSeg = null;
+  paginate();
+  keepInView(activeId);
+  toast(n === 1 ? 'Copy added below' : `${n} copies added below`);
+}
+let dupHold = { btn: null, timer: 0, fired: false };
+const endDupHold = () => { clearTimeout(dupHold.timer); if (dupHold.btn) dupHold.btn.classList.remove('holding'); dupHold.btn = null; };
+docRoot.addEventListener('pointerdown', e => {              // hold the duplicate button to choose how many copies
+  const btn = e.target.closest('[data-act="dup"]');
+  if (!btn || e.button !== 0) return;
+  endDupHold();
+  btn.classList.add('holding');
+  dupHold = { btn, fired: false, timer: setTimeout(() => { dupHold.fired = true; endDupHold(); openCopyPop(btn); }, 550) };
+});
+docRoot.addEventListener('pointerup', () => { endDupHold(); setTimeout(() => { dupHold.fired = false; }, 0); });
+docRoot.addEventListener('pointercancel', endDupHold);
+docRoot.addEventListener('pointerout', e => {
+  if (dupHold.btn && e.target.closest && e.target.closest('[data-act="dup"]') === dupHold.btn && !dupHold.btn.contains(e.relatedTarget)) endDupHold();
+});
+docRoot.addEventListener('contextmenu', e => {             // right-click (and long-press on touch screens)
+  const btn = e.target.closest('[data-act="dup"]');
+  if (!btn) return;
+  e.preventDefault();
+  endDupHold();
+  dupHold.fired = true;
+  openCopyPop(btn);
+});
+const copyPop = h('div', 'copy-pop');
+copyPop.hidden = true;
+copyPop.setAttribute('role', 'dialog');
+copyPop.setAttribute('aria-label', 'Make copies');
+pagesEl.append(copyPop);
+let copyTarget = null, copyBtn = null;
+function openCopyPop(btn) {
+  const blk = btn.closest('.blk');
+  if (!blk || (!copyPop.hidden && copyTarget === blk.dataset.id)) return;
+  copyTarget = blk.dataset.id;
+  copyBtn = btn;
+  copyPop.innerHTML = `<div class="cp-head">How many copies?</div>
+    <div class="cp-chips">${[2, 3, 5, 7, 10].map(n => `<button type="button" data-copies="${n}" aria-label="Add ${n} copies">${n}</button>`).join('')}</div>
+    <div class="cp-row"><input id="cpCount" type="number" min="1" max="${COPY_MAX}" value="3" aria-label="Number of copies"><button type="button" class="cp-go" data-copies-go>Add 3 copies</button></div>
+    <p class="cp-note">Placed below, with the same images and text.</p>`;
+  copyPop.hidden = false;
+  const base = pagesEl.getBoundingClientRect(), r = btn.getBoundingClientRect(), w = copyPop.offsetWidth;
+  const left = r.right + 8 + w <= window.innerWidth - 8 ? r.right + 8 : r.left - 8 - w;
+  copyPop.style.left = Math.max(8, left - base.left) + 'px';
+  copyPop.style.top = (r.top - base.top - 6) + 'px';
+  const inp = copyPop.querySelector('#cpCount');
+  inp.focus({ preventScroll: true });
+  try { inp.select(); } catch (_) { /* not supported for number fields in some browsers */ }
+}
+function closeCopyPop(returnFocus) {
+  if (copyPop.hidden) return;
+  copyPop.hidden = true;
+  if (returnFocus && copyBtn && copyBtn.isConnected) copyBtn.focus({ preventScroll: true });
+  copyTarget = null;
+  copyBtn = null;
+}
+const copyCount = () => Math.max(1, Math.min(COPY_MAX, Math.round(+copyPop.querySelector('#cpCount').value) || 1));
+const makeCopies = n => { const id = copyTarget; closeCopyPop(false); duplicateBlock(id, n); };
+copyPop.addEventListener('input', e => {
+  if (e.target.id !== 'cpCount') return;
+  const n = copyCount();
+  copyPop.querySelector('[data-copies-go]').textContent = n === 1 ? 'Add 1 copy' : `Add ${n} copies`;
+});
+copyPop.addEventListener('click', e => {
+  const chip = e.target.closest('[data-copies]');
+  if (chip) makeCopies(+chip.dataset.copies);
+  else if (e.target.closest('[data-copies-go]')) makeCopies(copyCount());
+});
+copyPop.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'cpCount') { e.preventDefault(); makeCopies(copyCount()); }
+  else if (e.key === 'Escape') { e.stopPropagation(); closeCopyPop(true); }
+});
+document.addEventListener('pointerdown', e => { if (!copyPop.hidden && !e.target.closest('.copy-pop, [data-act="dup"]')) closeCopyPop(false); });
+
+const secPop = h('div', 'sec-pop');
+secPop.hidden = true;
+secPop.setAttribute('role', 'dialog');
+secPop.setAttribute('aria-label', 'Table settings');
+pagesEl.append(secPop);
+let popId = null;
+function openSecPop(id, bandEl, view) {
+  const isResult = id === 'result', b = isResult ? null : byId(id), cur = isResult ? state.result : b;
+  if (!cur) return;
+  popId = id;
+  popView = view || (b ? b.type : 'result');
+  if (b && (b.type === 'headrow' || (b.type === 'docstart' && popView === 'heads'))) {   // heading row settings
+    const own = b.type === 'docstart';                                   // the page section's own heading row under its title bar
+    popHeadIdx = Math.max(0, visibleHeads(id).indexOf(bandEl));
+    secPop.innerHTML = `<div class="sp-head"><b>Heading row settings</b><button type="button" class="sp-x" data-sp-close aria-label="Close">${svg(ICON.x)}</button></div>
+      ${own ? `<label class="sp-check"><input type="checkbox" id="spHeads"${b.heads ? ' checked' : ''}><span>Show this heading row</span></label>` : ''}
+      <fieldset><legend>Headings</legend>${headListHTML(b)}</fieldset>
+      ${own ? '' : `<fieldset><legend>Position</legend>${positionHTML(b.place || 'flow')}</fieldset>`}
+      <p class="sp-note">${own ? 'This heading row belongs to the page section; its position follows the section.' : 'Position applies to this row and the content under it, up to the next heading row or page section.'} Drag the lines between the headings to change their widths; double-click a line to reset.</p>
+      <div class="sp-foot"><button type="button" class="sp-done" data-sp-close>Done</button></div>`;
+    $$('.sp-ht', secPop).forEach((inp, k) => { inp.value = b.cols[k].t; });
+    secPop.hidden = false;
+    positionSecPop();
+    revealSecPop();
+    const firstInput = secPop.querySelector('.sp-ht');
+    if (firstInput) firstInput.focus({ preventScroll: true });
+    return;
+  }
+  if (b && b.type === 'docstart') {                                     // page section: title and position
+    popBandIdx = Math.max(0, visibleBands(id).indexOf(bandEl));
+    secPop.innerHTML = `<div class="sp-head"><b>Page section settings</b><button type="button" class="sp-x" data-sp-close aria-label="Close">${svg(ICON.x)}</button></div>
+      <label class="sp-lbl" for="spTitle">Title</label><input id="spTitle" class="sp-input" type="text" maxlength="120" autocomplete="off">
+      <fieldset><legend>Title bar</legend><div class="sp-pair"><label class="sp-opt"><input type="radio" name="spTitleAll" value="all"${b.titleAll !== false ? ' checked' : ''}><span><b>On every page</b><small>Repeats at the top of each page.</small></span></label><label class="sp-opt"><input type="radio" name="spTitleAll" value="first"${b.titleAll === false ? ' checked' : ''}><span><b>First page only</b><small>Later pages start without it.</small></span></label></div></fieldset>
+      <fieldset><legend>Position</legend>${positionHTML(b.place || 'newpage')}</fieldset>
+      <p class="sp-note">Position applies to the title bar and everything up to the next page section. The bottom options apply when the whole section fits on one page. Pages are added or removed from its Pages menu.</p>
+      <div class="sp-foot"><button type="button" class="sp-done" data-sp-close>Done</button></div>`;
+    secPop.querySelector('#spTitle').value = b.title;
+    secPop.hidden = false;
+    positionSecPop();
+    revealSecPop();
+    secPop.querySelector('#spTitle').focus({ preventScroll: true });
+    return;
+  }
+  const opt = (name, val, now, label, note) =>
+    `<label class="sp-opt"><input type="radio" name="${name}" value="${val}"${val === now ? ' checked' : ''}><span><b>${label}</b><small>${note}</small></span></label>`;
+  const btn = (tool, label) => `<button type="button" data-sec-tool="${tool}">${label}</button>`;
+  const bottom = cur.place === 'bottom' || cur.place === 'bottomalone';
+  const tools = isResult ? '' : b.kind === 'check' ? btn('additem', '+ Item') + btn('addgroup', '+ Group')
+    : b.kind === 'data' ? btn('addrow', '+ Row') + btn('addcol', '+ Column') + btn('delcol', '− Column') : btn('addrow', '+ Row');
+  const split = !isResult && b.split ? 'split' : 'keep';
+  secPop.innerHTML = `<div class="sp-head"><b>Table settings</b><button type="button" class="sp-x" data-sp-close aria-label="Close">${svg(ICON.x)}</button></div>
+    <label class="sp-lbl" for="spTitle">Title</label><input id="spTitle" class="sp-input" type="text" maxlength="120" autocomplete="off">
+    <fieldset><legend>Position</legend>
+      ${opt('spPlace', 'flow', cur.place, 'Flow with the content', 'Follows whatever comes before it.')}
+      ${opt('spPlace', 'newpage', cur.place, 'Start on a new page', 'Always begins at the top of a page.')}
+      ${opt('spPlace', 'alone', cur.place, 'Alone on its own page', 'Nothing else shares its page, and the photo/sketch band is hidden there.')}
+      <div class="sp-pair">
+        ${opt('spPlace', 'bottom', cur.place, 'Bottom in-line', 'Placed at bottom, follows content.')}
+        ${opt('spPlace', 'bottomalone', cur.place, 'Bottom alone', 'Placed at bottom on its own page.')}
+      </div>
+    </fieldset>
+    ${isResult ? '<p class="sp-note">The result table is always kept together.</p>' : `<fieldset class="sp-breaks"${bottom ? ' disabled' : ''}><legend>Page breaks</legend>
+      ${opt('spSplit', 'keep', split, 'Keep together', 'Moves to the next page if it doesn’t fit. Tables longer than a page still continue.')}
+      ${opt('spSplit', 'split', split, 'Allow splitting', 'Fills the page and continues on the next, with the title repeated.')}
+      <p class="sp-note sp-bnote"${bottom ? '' : ' hidden'}>Kept together when placed at the bottom.</p>
+    </fieldset>`}
+    ${!isResult && b.kind === 'info' ? `<fieldset><legend>Layout</legend>${opt('spPairs', '2', String(b.pairs), 'Two pairs per row', 'Label | value | label | value')}${opt('spPairs', '1', String(b.pairs), 'One pair per row', 'Label | value')}</fieldset>` : ''}
+    ${tools ? `<div class="sp-tools">${tools}</div>` : ''}
+    <div class="sp-foot"><button type="button" class="sp-done" data-sp-close>Done</button></div>`;
+  secPop.querySelector('#spTitle').value = cur.title;
+  secPop.hidden = false;
+  positionSecPop();
+  revealSecPop();
+  secPop.querySelector('#spTitle').focus({ preventScroll: true });
+}
+function revealSecPop() {                                // title bar just under the toolbar, panel below it (follows the table when it moves)
+  const band = bandOf(popId), minTop = tbEl.offsetHeight + 16;
+  if (!band || secPop.hidden) return;
+  if (band.getBoundingClientRect().top < minTop || secPop.getBoundingClientRect().bottom > window.innerHeight - 12)
+    window.scrollBy({ top: band.getBoundingClientRect().top - minTop, behavior: 'auto' });
+  fitSecPop();
+}
+function fitSecPop() {                                   // keep the whole panel reachable on short screens
+  const band = bandOf(popId);
+  if (!band || secPop.hidden) return;
+  secPop.style.maxHeight = Math.max(260, window.innerHeight - anchorOf(band).getBoundingClientRect().bottom - 20) + 'px';
+}
+let popBandIdx = 0, popHeadIdx = 0, popView = '';
+const positionHTML = now => {
+  const opt = (val, label, note) => `<label class="sp-opt"><input type="radio" name="spPlace" value="${val}"${val === now ? ' checked' : ''}><span><b>${label}</b><small>${note}</small></span></label>`;
+  return opt('flow', 'Flow with the content', 'Follows whatever comes before it.')
+    + opt('newpage', 'Start on a new page', 'Always begins at the top of a page.')
+    + opt('alone', 'Alone on its own page', 'Starts on a new page, and what follows starts on a new page.')
+    + `<div class="sp-pair">${opt('bottom', 'Bottom in-line', 'Placed at bottom, follows content.')}${opt('bottomalone', 'Bottom alone', 'Placed at bottom on its own page.')}</div>`;
+};
+const headListHTML = b => `<div class="sp-cols">${b.cols.map((c, k) => `<div class="sp-hrow"><span class="sp-hn">${k + 1}</span><input class="sp-input sp-ht" data-k="${k}" type="text" maxlength="80" placeholder="Heading" aria-label="Heading ${k + 1}" autocomplete="off"><span class="sp-hw">${Math.round(c.w * 100)}%</span><button type="button" class="sp-hx" data-hdel="${k}" aria-label="Remove heading ${k + 1}"${b.cols.length < 2 ? ' disabled' : ''}>${svg(ICON.x)}</button></div>`).join('')}</div>
+        <div class="sp-tools"><button type="button" data-hadd${b.cols.length >= HEAD_MAX ? ' disabled' : ''}>+ Add heading</button><button type="button" data-heq>Equal widths</button></div>`;
+const visibleHeads = id => $$(`.subhead[data-head-id="${id}"]`, docRoot).filter(x => x.getClientRects().length);
+const visibleBands = id => $$(`.part[data-part="${id}"] .band-table .sec-band, .blk-sband[data-id="${id}"] .sec-band`, docRoot).filter(x => x.getClientRects().length);
+const anchorOf = band => (band && band.closest('.band-table') ? band.closest('.band-table') : band);
+const secIdOf = band => band.dataset.secId || (band.closest('.blk') ? band.closest('.blk').dataset.id : 'result');
+const bandOf = id => {
+  if (id === 'result') return resultEl.querySelector('.sec-band');
+  const b = byId(id);
+  if (b && (b.type === 'headrow' || (b.type === 'docstart' && popView === 'heads'))) {
+    const rows = visibleHeads(id);
+    if (rows.length || b.type === 'headrow') return rows[popHeadIdx] || rows[0] || null;   // a hidden section heading row: anchor at the title bar
+  }
+  if (b && b.type === 'docstart') { const bands = visibleBands(id); return bands[popBandIdx] || bands[bands.length - 1] || null; }
+  return docRoot.querySelector(`.blk-sec[data-id="${id}"] .sec-band`);
+};
+function headCells(src) {                                  // one heading cell per column, with draggable lines between them
+  const n = src.cols.length;
+  return src.cols.map((c, i) => {
+    const th = h('th', null, { textContent: c.t });
+    if (i < n - 1) {
+      const hd = h('div', 'hd-handle', { tabIndex: 0, title: 'Drag to change the column widths. Double-click to reset.' });
+      hd.dataset.i = String(i);
+      hd.setAttribute('role', 'separator');
+      hd.setAttribute('aria-orientation', 'vertical');
+      hd.setAttribute('aria-label', `Line between heading ${i + 1} and ${i + 2}`);
+      hd.append(h('span', 'split-badge'));
+      th.append(hd);
+    } else th.append(h('span', 'head-gear', { innerHTML: svg(ICON.gear) }));
+    return th;
+  });
+}
+function renderSubhead(table, src) {                       // src = a page section (its own headings) or an inserted heading row
+  const sub = table.querySelector('.subhead');
+  sub.dataset.headId = src.id;
+  sub.title = src.type === 'headrow' ? 'Heading row settings' : 'Page section settings';
+  table.querySelector('colgroup').replaceChildren(...src.cols.map(() => document.createElement('col')));
+  sub.replaceChildren(...headCells(src));
+  const band = table.querySelector('.sec-band');
+  if (band) band.colSpan = src.cols.length;
+  sizeHeads(table, src);
+}
+function applyPagesHeader(pg, b, head) {                    // page header: section title + the heading row in effect when the page starts
+  const band = pg.querySelector('.band-table .sec-band');
+  if (!band) return;
+  band.dataset.secId = b.id;
+  band.querySelector('.sec-title').textContent = (b.title || '').trim() || 'Untitled pages';
+  renderSubhead(pg.querySelector('.band-table'), head || b);
+  pg.classList.toggle('no-heads', !head && !b.heads);
+  const showBtn = band.querySelector('.heads-show');
+  if (showBtn) showBtn.remove();
+  if (!head && !b.heads) band.append(headsShowBtn());
+}
+function sizeHeads(table, b) {                             // column widths + ratio label
+  const label = b.cols.map(c => Math.round(c.w * 100)).join(' : ');
+  [...table.querySelectorAll('colgroup col')].forEach((col, i) => { col.style.width = (b.cols[i].w * CW).toFixed(2) + 'mm'; });
+  table.querySelectorAll('.hd-handle').forEach(hd => { hd.firstElementChild.textContent = label; hd.setAttribute('aria-valuenow', String(Math.round(b.cols.slice(0, +hd.dataset.i + 1).reduce((a, c) => a + c.w, 0) * 100))); });
+}
+function updateHeads(b) {                                  // live widths wherever these headings show (and in the settings panel)
+  $$(`.subhead[data-head-id="${b.id}"]`, docRoot).forEach(sub => sizeHeads(sub.closest('table'), b));
+  if (popId === b.id) $$('.sp-hw', secPop).forEach((el, k) => { if (b.cols[k]) el.textContent = Math.round(b.cols[k].w * 100) + '%'; });
+}
+function refreshHead(b) {                                  // heading texts changed: rebuild wherever they show
+  $$(`.subhead[data-head-id="${b.id}"]`, docRoot).forEach(sub => renderSubhead(sub.closest('table'), b));
+}
+let measureWrap = null;
+function measureBox() {                                    // off-screen area as wide as a page's content
+  if (!measureWrap) { measureWrap = h('div', 'measure-wrap'); measureWrap.append(h('div', 'doc-content')); pagesEl.append(measureWrap); }
+  const m = measureWrap.firstElementChild;
+  m.replaceChildren();
+  return m;
+}
+function groupMm(i, end, withBand) {                       // height of a group laid out in one piece (Infinity if it has to break)
+  const blocks = state.blocks, m = measureBox(), start = blocks[i];
+  if (withBand) m.append(sbandNode(start));
+  if (start.type === 'headrow') m.append(headNode(start));
+  for (let j = i + 1; j < end; j++) {
+    const b = blocks[j];
+    if (b.type === 'break' || b.type === 'docstart' || ((b.type === 'section' || b.type === 'headrow') && (b.place || 'flow') !== 'flow')) { m.replaceChildren(); return Infinity; }
+    let el;
+    if (b.type === 'text') el = textFrag(b, 0, b.text);
+    else if (b.type === 'section') { el = secHeader(b, false); const tb = el.querySelector('tbody'); for (let k = 0; k < secBody(b); k++) tb.append(secRow(b, k)); }
+    else if (b.type === 'headrow') el = headNode(b);
+    else el = nodeFor(b);
+    m.append(el);
+    $$('textarea', el).forEach(autosize);
+  }
+  const mm = m.getBoundingClientRect().height / (MM * docZoom);
+  m.replaceChildren();
+  return mm;
+}
+function sbandMm(b) { const m = measureBox(); m.append(sbandNode(b)); const mm = m.getBoundingClientRect().height / (MM * docZoom); m.replaceChildren(); return mm; }
+function headsShowBtn() {
+  const btn = h('button', 'heads-show', { type: 'button', textContent: 'Show heading row', title: 'Show the heading row under this title bar again' });
+  btn.dataset.headsShow = '';
+  return btn;
+}
+function sbandNode(b) {                                    // a page section's title bar placed mid-page (Flow / Bottom in-line)
+  const n = h('div', 'blk blk-sband' + (b.heads ? '' : ' no-heads'));
+  n.dataset.id = b.id;
+  const t = h('table', 'grid sband-table');
+  t.append(document.createElement('colgroup'));
+  const tb = t.createTBody();
+  const band = h('th', 'band sec-band', { tabIndex: 0, title: 'Page section settings' });
+  band.setAttribute('role', 'button');
+  band.setAttribute('aria-haspopup', 'dialog');
+  band.dataset.secId = b.id;
+  band.append(h('span', 'sec-title', { textContent: (b.title || '').trim() || 'Untitled pages' }), h('span', 'sec-gear', { innerHTML: svg(ICON.gear) }));
+  if (!b.heads) band.append(headsShowBtn());
+  tb.insertRow().append(band);
+  tb.insertRow().className = 'subhead';
+  renderSubhead(t, b);
+  n.append(t, controls(b));
+  return n;
+}
+function headNode(b) {                                     // a heading row placed in the content
+  const n = h('div', 'blk blk-head');
+  n.dataset.id = b.id;
+  const t = h('table', 'grid head-table');
+  t.append(document.createElement('colgroup'));
+  t.createTBody().insertRow().className = 'subhead';
+  renderSubhead(t, b);
+  n.append(t, controls(b));
+  return n;
+}
+function addHeadRow() {
+  const b = { id: newId(), type: 'headrow', place: 'flow', cols: [{ t: 'Image', w: 0.4 }, { t: 'Description', w: 0.6 }] };
+  insert([b]);
+  paginate();
+  keepInView(b.id);
+  openSecPop(b.id, docRoot.querySelector(`.blk-head[data-id="${b.id}"] .subhead`));
+}
+const headSnaps = (b, i) => [0.25, 1 / 3, 0.4, 0.5, 0.6, 2 / 3, 0.75, (i + 1) / b.cols.length];
+let lastHeadDown = { key: '', t: 0 };
+docRoot.addEventListener('pointerdown', e => {
+  const hd = e.target.closest('.hd-handle');
+  if (!hd || e.button !== 0) return;
+  const table = hd.closest('table'), b = byId(hd.closest('.subhead').dataset.headId), i = +hd.dataset.i;
+  if (!b || !b.cols[i + 1]) return;
+  e.preventDefault();
+  const key = b.id + ':' + i, now = Date.now();
+  if (lastHeadDown.key === key && now - lastHeadDown.t < 400) {       // double-click: default widths
+    lastHeadDown = { key: '', t: 0 };
+    headDefaults(b.cols.length).forEach((w, k) => { b.cols[k].w = w; });
+    updateHeads(b);
+    paginate();
+    return;
+  }
+  lastHeadDown = { key, t: now };
+  const rect = table.getBoundingClientRect(), left = b.cols.slice(0, i).reduce((a, c) => a + c.w, 0), pair = b.cols[i].w + b.cols[i + 1].w;
+  let moved = false;
+  hd.setPointerCapture(e.pointerId);
+  hd.classList.add('dragging');
+  document.body.classList.add('dragging-split');
+  const move = ev => {
+    let x = (ev.clientX - rect.left) / rect.width;
+    for (const snap of headSnaps(b, i)) if (Math.abs(x - snap) < SNAP_TOL) x = snap;
+    const w = Math.min(pair - HEAD_MIN, Math.max(HEAD_MIN, x - left));
+    if (Math.abs(w - b.cols[i].w) > 1e-4) { b.cols[i].w = w; b.cols[i + 1].w = pair - w; moved = true; updateHeads(b); }
+  };
+  const end = () => {
+    hd.removeEventListener('pointermove', move);
+    hd.removeEventListener('pointerup', end);
+    hd.removeEventListener('pointercancel', end);
+    hd.classList.remove('dragging');
+    document.body.classList.remove('dragging-split');
+    if (moved) { lastHeadDown = { key: '', t: 0 }; paginate(); }
+  };
+  hd.addEventListener('pointermove', move);
+  hd.addEventListener('pointerup', end);
+  hd.addEventListener('pointercancel', end);
+});
+docRoot.addEventListener('keydown', e => {
+  const hd = e.target instanceof Element ? e.target.closest('.hd-handle') : null;
+  if (!hd || !['ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) return;
+  const b = byId(hd.closest('.subhead').dataset.headId), i = +hd.dataset.i;
+  if (!b || !b.cols[i + 1]) return;
+  e.preventDefault();
+  if (e.key === 'Enter') headDefaults(b.cols.length).forEach((w, k) => { b.cols[k].w = w; });
+  else {
+    const pair = b.cols[i].w + b.cols[i + 1].w, step = (e.shiftKey ? 0.05 : 0.01) * (e.key === 'ArrowLeft' ? -1 : 1);
+    b.cols[i].w = Math.min(pair - HEAD_MIN, Math.max(HEAD_MIN, b.cols[i].w + step));
+    b.cols[i + 1].w = pair - b.cols[i].w;
+  }
+  updateHeads(b);
+  schedule(300);
+});
+function fitScrollRoom() {                                  // room below the last page section so it can scroll up and its Pages menu can stick
+  const last = docRoot.lastElementChild, base = 24 * MM;
+  const room = last && last.dataset.kind === 'doc' ? Math.max(base, window.innerHeight - (tbEl.offsetHeight + 12) - last.getBoundingClientRect().height + base) : base;
+  pagesEl.style.setProperty('--end-room', Math.round(room) + 'px');
+}
+const setResultTitle = () => { resultEl.querySelector('.sec-title').textContent = state.result.title.trim() || 'Untitled table'; };
+function closeSecPop(returnFocus) {
+  if (secPop.hidden) return;
+  secPop.hidden = true;
+  const band = bandOf(popId);
+  popId = null;
+  if (returnFocus && band) band.focus({ preventScroll: true });
+}
+function positionSecPop() {
+  if (secPop.hidden) return;
+  const band = bandOf(popId);
+  if (!band || !band.isConnected) { closeSecPop(false); return; }
+  const base = pagesEl.getBoundingClientRect(), r = anchorOf(band).getBoundingClientRect();
+  secPop.style.left = Math.max(8, r.right - base.left - secPop.offsetWidth) + 'px';
+  secPop.style.top = (r.bottom - base.top + 6) + 'px';
+}
+secPop.addEventListener('input', e => {
+  const t = e.target;
+  if (popId === 'result') { if (t.id === 'spTitle') { state.result.title = t.value; setResultTitle(); } return; }
+  const b = byId(popId);
+  if (!b) return;
+  if (b.type === 'docstart' || b.type === 'headrow') {
+    if (t.id === 'spTitle' && b.type === 'docstart') {
+      b.title = t.value;
+      $$(`.part[data-part="${b.id}"] .band-table .sec-title, .blk-sband[data-id="${b.id}"] .sec-title`, docRoot).forEach(x => { x.textContent = (b.title || '').trim() || 'Untitled pages'; });
+    } else if (t.classList.contains('sp-ht')) { b.cols[+t.dataset.k].t = t.value; refreshHead(b); }
+    else return;
+    schedule(300);                                          // a long heading can wrap and change the page space
+    return;
+  }
+  if (t.id !== 'spTitle') return;
+  b.title = t.value;
+  $$(`.blk-sec[data-id="${b.id}"] .sec-title`, docRoot).forEach((t, i) => { t.textContent = secTitle(b, i > 0); });
+});
+secPop.addEventListener('change', e => {
+  const t = e.target, b = popId === 'result' ? state.result : byId(popId);
+  if (!b) return;
+  if (t.id === 'spHeads') { if (b.type === 'docstart') { b.heads = t.checked; paginate(); revealSecPop(); } return; }
+  if (t.name === 'spPlace') {
+    b.place = t.value;
+    const atBottom = t.value === 'bottom' || t.value === 'bottomalone', fs = secPop.querySelector('.sp-breaks');
+    if (fs) { fs.disabled = atBottom; fs.querySelector('.sp-bnote').hidden = !atBottom; }
+  }
+  else if (t.name === 'spSplit' && popId !== 'result') b.split = t.value === 'split';
+  else if (t.name === 'spPairs' && popId !== 'result') setPairs(b, +t.value);
+  else if (t.name === 'spTitleAll' && b.type === 'docstart') b.titleAll = t.value === 'all';
+  else return;
+  paginate();
+  revealSecPop();
+});
+secPop.addEventListener('click', e => {
+  if (e.target.closest('[data-sp-close]')) { closeSecPop(true); return; }
+  const hb = e.target.closest('[data-hadd], [data-hdel], [data-heq]'), ps = byId(popId);
+  if (hb && ps && (ps.type === 'docstart' || ps.type === 'headrow') && !hb.disabled) {   // headings: add, remove, equal widths
+    if (hb.hasAttribute('data-hadd') && ps.cols.length < HEAD_MAX) {
+      const n = ps.cols.length + 1;
+      ps.cols.forEach(c => { c.w *= (n - 1) / n; });
+      ps.cols.push({ t: '', w: 1 / n });
+    } else if (hb.hasAttribute('data-hdel') && ps.cols.length > 1) {
+      ps.cols.splice(+hb.dataset.hdel, 1);
+      normalizeCols(ps.cols);
+    } else if (hb.hasAttribute('data-heq')) headDefaults(ps.cols.length).forEach((w, k) => { ps.cols[k].w = ps.cols.length === 2 ? 0.5 : w; });
+    const band = bandOf(ps.id), added = hb.hasAttribute('data-hadd');
+    paginate();
+    openSecPop(ps.id, bandOf(ps.id) || band, popView);
+    if (added) { const inputs = $$('.sp-ht', secPop); inputs[inputs.length - 1].focus({ preventScroll: true }); }
+    return;
+  }
+  const tool = e.target.closest('[data-sec-tool]'), b = byId(popId);
+  if (!tool || !b) return;
+  secTool(b, tool.dataset.secTool);
+  paginate();
+  revealSecPop();
+});
+secPop.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.target.id === 'spTitle' || e.target.classList.contains('sp-ht'))) closeSecPop(true); });
+document.addEventListener('pointerdown', e => { if (!secPop.hidden && !e.target.closest('.sec-pop, .sec-band, .hd-handle')) closeSecPop(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !secPop.hidden) closeSecPop(true); });
+docRoot.addEventListener('keydown', e => {
+  const band = e.target instanceof Element ? e.target.closest('.sec-band') : null;
+  if (band && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openSecPop(secIdOf(band), band); }
+});
+window.addEventListener('resize', () => { positionSecPop(); fitSecPop(); fitScrollRoom(); });
+
+/* Toolbar dropdown: tables */
+const tblToggle = $('#tblToggle'), tblMenu = $('#tblMenu');
+function setTblMenu(open) {
+  tblMenu.hidden = !open;
+  tblToggle.setAttribute('aria-expanded', String(open));
+  if (open) tblMenu.querySelector('.pm-item').focus();
+}
+tblToggle.addEventListener('click', () => setTblMenu(tblMenu.hidden));
+document.addEventListener('pointerdown', e => { if (!tblMenu.hidden && !tblToggle.parentElement.contains(e.target)) setTblMenu(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !tblMenu.hidden) { setTblMenu(false); tblToggle.focus(); } });
+tblMenu.addEventListener('keydown', e => {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  const items = $$('.pm-item', tblMenu), i = Math.max(0, items.indexOf(document.activeElement));
+  items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+});
+tblMenu.addEventListener('click', e => {
+  const it = e.target.closest('[data-sec], [data-pages], [data-headrow]');
+  if (!it) return;
+  setTblMenu(false);
+  if (it.hasAttribute('data-pages')) addPagesSection();
+  else if (it.hasAttribute('data-headrow')) addHeadRow();
+  else addSection(it.dataset.sec);
+});
+function addPagesSection() {
+  const b = docStart();
+  insert([b]);
+  activeId = null;
+  activeSeg = b.id;                                         // new content goes into the new page section
+  paginate();
+  const pg = docRoot.querySelector(`.page[data-seg="${b.id}"]`);
+  scrollToPage(pg);
+  toast(`Page section added (page ${pageNo(pg)})`);
+}
+
+/* ---------- Pages: menu, page breaks and page numbers ---------- */
+const btnPageNo = $('#btnPageNo'), tbEl = $('.toolbar');
+
+function hintNode() {
+  const d = h('div', 'hint');
+  d.innerHTML = '<p>Click the page and use “Add” for text, images and two-column rows – or paste / drag images here.</p><p>Only shown on screen.</p>';
+  return d;
+}
+function pageCtl(act, label, icon) {
+  const b = h('button', 'page-ctl', { type: 'button', title: label, innerHTML: svg(icon) });
+  b.setAttribute('aria-label', label);
+  b.dataset.pageAct = act;
+  return b;
+}
+function decoratePages() {
+  $$('.doc-page', docRoot).forEach(pg => {
+    const c = pg.querySelector('.doc-content'), kind = pg.dataset.kind;
+    pg.classList.toggle('result-only', kind !== 'manual' && c.contains(resultEl) && !c.querySelector('.blk'));
+    pg.classList.toggle('solo', pg.dataset.solo === '1');
+    const firstEl = c.firstElementChild;
+    pg.classList.toggle('head-top', !!firstEl && firstEl.classList.contains('blk-head'));   // heading row at the top of the page replaces the header's heading row                        // a table set to be alone: no photo/sketch band
+    if (kind === 'manual' && !c.querySelector('.blk')) { c.classList.add('empty'); c.prepend(hintNode()); }   // empty page: result at the bottom
+    if (kind === 'manual' && pg.dataset.seg && pg.dataset.start !== 'section') pg.append(pageCtl('unbreak', 'Remove this page (content moves up)', ICON.pageMinus));
+    if (kind === 'result') pg.append(pageCtl('unown', 'Move the result back to the previous page', ICON.toTop));
+  });
+  const all = $$('.page');
+  all.forEach((p, i) => { const n = p.querySelector('.page-no'); if (n) n.textContent = `Page ${i + 1} of ${all.length}`; });
+  markActive();
+}
+const pageNo = el => $$('.page').indexOf(el) + 1;
+
+function removePage(btn) {
+  const pg = btn.closest('.doc-page');
+  if (btn.dataset.pageAct === 'unbreak') {
+    const i = indexOf(pg.dataset.seg);
+    if (i >= 0) state.blocks.splice(i, 1);
+    if (activeSeg === pg.dataset.seg) activeSeg = null;
+    paginate();
+    toast('Page removed');
+  } else {
+    state.result.place = 'flow';
+    paginate();
+    toast('Result moved back');
+  }
+}
+const PM_ICON = {
+  pages: '<path d="M8.5 3.5h8l3 3v11h-11z"/><path d="M5 7v13.5h11"/>',
+  full: '<path d="M6 3.5h12v17H6z"/><path d="M9 8h6M9 11.5h6M9 15h6"/>',
+  plus: '<path d="M6 3.5h12v17H6z"/><path d="M12 9v6M9 12h6"/>',
+  two: '<rect x="3.5" y="6" width="10" height="14.5" rx="1"/><path d="M8 3.5h12v14.5h-3.5"/>'
+};
+function pageMenu(partId, hasResult) {
+  const own = resultOwnPage();
+  const item = (page, icon, label, note, checked) =>
+    `<button type="button" class="pm-item" role="${checked == null ? 'menuitem' : 'menuitemcheckbox'}"${checked == null ? '' : ` aria-checked="${checked}"`} data-page="${page}">${svg(icon)}<span><b>${label}</b><small>${note}</small></span>` +
+    (checked == null ? '' : '<svg class="i check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>') + '</button>';
+  const m = h('div', 'page-menu');
+  m.dataset.part = partId;
+  m.innerHTML = `<div class="pm-anchor"><button type="button" class="pm-toggle" aria-haspopup="menu" aria-expanded="false">${svg(PM_ICON.pages)}Pages<svg class="i chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="pm-items" role="menu" aria-label="Page layout for this page section" hidden>
+      ${hasResult ? item('full', PM_ICON.full, 'Full page', own ? 'On: the result is on its own page. Click to move it back.' : 'The inspection area fills the whole page – the result moves to a new page.', String(own)) : ''}
+      ${hasResult ? item('with-result', PM_ICON.plus, 'New page with result', 'Adds a page with the result at the bottom.') : ''}
+      ${item('new-full', PM_ICON.two, 'New full page', hasResult ? 'Adds a full page – the result gets its own page.' : 'Adds a full page at the end of this page section.')}
+      <div class="pm-sep" role="separator"></div>
+      ${item('remove', ICON.pageMinus, 'Remove these pages', 'Removes this page section. Its content moves up to the pages before it.')}
+    </div></div>`;
+  return m;
+}
+let openPm = null;
+function setPm(menu, open) {
+  if (open && openPm && openPm !== menu && openPm.isConnected) setPm(openPm, false);
+  const items = menu.querySelector('.pm-items');
+  items.hidden = !open;
+  menu.querySelector('.pm-toggle').setAttribute('aria-expanded', String(open));
+  if (open) { openPm = menu; items.querySelector('.pm-item').focus(); }
+  else if (openPm === menu) openPm = null;
+}
+function pageMenuAction(kind, partId) {
+  const di = indexOf(partId);
+  if (di < 0) return;
+  let end = di + 1;
+  while (end < state.blocks.length && state.blocks[end].type !== 'docstart') end++;
+  const hasResult = end === state.blocks.length;            // the last page section holds the result table
+  let pg;
+  if (kind === 'remove') {
+    state.blocks.splice(di, 1);
+    if (activeSeg === partId) activeSeg = null;
+    paginate();
+    toast('Page section removed. Its content moved up.');
+    return;
+  }
+  if (kind === 'full') {
+    state.result.place = resultOwnPage() ? 'flow' : 'alone';
+    paginate();
+    pg = resultEl.closest('.page');
+    toast(resultOwnPage() ? `The result is now on its own page (page ${pageNo(pg)}).` : 'The result is back with the documentation.');
+  } else {
+    const br = { id: newId(), type: 'break' };
+    state.blocks.splice(end, 0, br);
+    if (hasResult) {
+      if (kind === 'new-full') { if (!resultOwnPage()) state.result.place = 'alone'; }
+      else if (resultOwnPage()) state.result.place = 'flow';
+    }
+    activeId = null;
+    activeSeg = br.id;                                      // new content goes on the new page
+    paginate();
+    pg = docRoot.querySelector(`.doc-page[data-seg="${br.id}"]`);
+    toast(!hasResult ? `New page added (page ${pageNo(pg)}).`
+      : resultOwnPage() ? `New page added (page ${pageNo(pg)}). The result has its own page.` : `New page added (page ${pageNo(pg)}) with the result at the bottom.`);
+  }
+  scrollToPage(pg);
+}
+function scrollToPage(pg) {
+  if (!pg) return;
+  const top = pg.getBoundingClientRect().top, tb = tbEl.offsetHeight;
+  if (top > tb && top < window.innerHeight * 0.5) return;
+  window.scrollTo({ top: window.scrollY + top - tb - 14, behavior: smooth() });
+}
+docRoot.addEventListener('click', e => {
+  const tg = e.target.closest('.pm-toggle');
+  if (tg) { const m = tg.closest('.page-menu'); setPm(m, m.querySelector('.pm-items').hidden); return; }
+  const it = e.target.closest('.page-menu .pm-item');
+  if (!it) return;
+  const m = it.closest('.page-menu');
+  setPm(m, false);
+  pageMenuAction(it.dataset.page, m.dataset.part);
+});
+document.addEventListener('pointerdown', e => { if (openPm && openPm.isConnected && !openPm.contains(e.target)) setPm(openPm, false); });
+document.addEventListener('keydown', e => {
+  if (!openPm || !openPm.isConnected) { openPm = null; return; }
+  if (e.key === 'Escape') { const tg = openPm.querySelector('.pm-toggle'); setPm(openPm, false); tg.focus(); return; }
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  const items = $$('.pm-item', openPm), i = Math.max(0, items.indexOf(document.activeElement));
+  items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+});
+
+function setPageNumbers(on) {
+  document.body.classList.toggle('no-pageno', !on);
+  btnPageNo.setAttribute('aria-checked', String(on));
+}
+btnPageNo.addEventListener('click', () => setPageNumbers(btnPageNo.getAttribute('aria-checked') !== 'true'));
+
+const setTbH = () => document.documentElement.style.setProperty('--tb-h', tbEl.offsetHeight + 'px');
+if ('ResizeObserver' in window) new ResizeObserver(setTbH).observe(tbEl);
+setTbH();
+
+/* ---------- Start ---------- */
+fitZoom();
+state.blocks = [...buildReport(null), docStart()];
+resultEl.querySelector('.sec-gear').innerHTML = svg(ICON.gear);
+setResultTitle();
+$$('.f').forEach(markEmpty);
+paginate();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => paginate());
+})();
+</script>
+</body>
+</html>
